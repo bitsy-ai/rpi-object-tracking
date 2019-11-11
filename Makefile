@@ -1,4 +1,4 @@
-.PHONY: clean clean-test clean-pyc clean-build docs help
+.PHONY: clean clean-test clean-pyc clean-build docs help rpi-deps
 .DEFAULT_GOAL := help
 
 define BROWSER_PYSCRIPT
@@ -86,3 +86,8 @@ dist: clean ## builds source and wheel package
 
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
+
+rpi-deps:
+	sudo apt-get update && sudo apt-get install -y \
+	cmake python3-dev libjpeg-dev zlib1g-dev
+	
