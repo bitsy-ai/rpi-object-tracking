@@ -93,3 +93,6 @@ rpi-deps:
 	libatlas-base-dev raspi-gpio \
 	pycocotools
 	
+protoc: rpi-deps
+	protoc models/research/object_detection/protos/*.proto --python_out=.
+	pip install -e ./models/research
