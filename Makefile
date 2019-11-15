@@ -89,5 +89,7 @@ install: clean ## install the package to the active Python's site-packages
 
 rpi-deps:
 	sudo apt-get update && sudo apt-get install -y \
-	cmake python3-dev libjpeg-dev zlib1g-dev
+	cmake python3-dev libjpeg-dev \	
+	libatlas-base-dev raspi-gpio \
+	pycocotools
 	
