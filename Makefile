@@ -89,10 +89,8 @@ install: clean ## install the package to the active Python's site-packages
 
 rpi-deps:
 	sudo apt-get update && sudo apt-get install -y \
-	cmake python3-dev libjpeg-dev \	
-	libatlas-base-dev raspi-gpio \
-	pycocotools
+	cmake python3-dev libjpeg-dev libatlas-base-dev raspi-gpio
 	
 protoc: rpi-deps
-	protoc models/research/object_detection/protos/*.proto --python_out=.
-	pip install -e ./models/research
+	cd models/research/ && protoc object_detection/protos/*.proto --python_out=.
+	pip install .
