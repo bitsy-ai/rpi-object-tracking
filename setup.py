@@ -18,6 +18,7 @@ common_requirements = [
     'pillow',
     'pycocotools',
     'jupyter',
+    'h5py'
 ]
 
 trainer_requirements = [
