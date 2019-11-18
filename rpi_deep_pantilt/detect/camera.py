@@ -6,8 +6,8 @@ from picamera.array import PiRGBArray
 from picamera import PiCamera
 import numpy as np
 
-from concurrent.futures import ThreadPoolExecutor
-# from threading import Thread
+#from concurrent.futures import ThreadPoolExecutor
+from threading import Thread
 
 # from multiprocessing.pool import ThreadPool
 
@@ -52,7 +52,7 @@ class PiCameraStream(object):
         max_workers=2
     ):
 
-        self.pool = ThreadPoolExecutor(max_workers=max_workers)
+        #self.pool = ThreadPoolExecutor(max_workers=max_workers)
         self.camera = PiCamera()
         self.camera.resolution = resolution
         self.camera.framerate = framerate
