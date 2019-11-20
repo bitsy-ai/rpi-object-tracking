@@ -48,8 +48,66 @@ def detect(label):
         capture_manager.stop()
 
 @cli.command()
-def track(args=None):
-    pass
+def track():
+	with Manager() as manager:
+		# enable the servos
+		pth.servo_enable(1, True)
+		pth.servo_enable(2, True)
+
+		# set integer values for the object center (x, y)-coordinates
+		centerX = manager.Value("i", 0)
+		centerY = manager.Value("i", 0)
+
+		# set integer values for the object's (x, y)-coordinates
+		objX = manager.Value("i", 0)
+		objY = manager.Value("i", 0)
+
+		# pan and tilt values will be managed by independed PIDs
+		pan = manager.Value("i", 0)
+		tlt = manager.Value("i", 0)
+
+		# set PID values for panning
+		panP = manager.Value("f", 0.09)
+		panI = manager.Value("f", 0.08)
+		panD = manager.Value("f", 0.002)
+
+		# set PID values for tilting
+		tiltP = manager.Value("f", 0.11)
+		tiltI = manager.Value("f", 0.10)
+		tiltD = manager.Value("f", 0.002)
+
+		# we have 4 independent processes
+		# 1. objectCenter  - finds/localizes the object
+		# 2. panning       - PID control loop determines panning angle
+		# 3. tilting       - PID control loop determines tilting angle
+		# 4. setServos     - drives the servos to proper angles based
+		#                    on PID feedback to keep object in center
+		processObjectCenter = Process(target=obj_center,
+			args=(args, objX, objY, centerX, centerY))
+
+		processPanning = Process(target=pid_process,
+			args=(pan, panP, panI, panD, objX, centerX))
+
+		processTilting = Process(target=pid_process,
+			args=(tlt, tiltP, tiltI, tiltD, objY, centerY))
+            
+		processSetServos = Process(target=set_servos, args=(pan, tlt))
+
+		# start all 4 processes
+		processObjectCenter.start()
+		processPanning.start()
+		processTilting.start()
+		processSetServos.start()
+
+		# join all 4 processes
+		processObjectCenter.join()
+		processPanning.join()
+		processTilting.join()
+		processSetServos.join()
+
+		# disable the servos
+		pth.servo_enable(1, False)
+		pth.servo_enable(2, False)
 
 if __name__ == "__main__":
     cli()
