@@ -76,7 +76,7 @@ class PiCameraStream(object):
         if self.overlay:
             self.overlay.update(image_buff)
         else:
-            self.overlay = self.camera.add_overlay(image_buff, layer=3, size=(224,224))
+            self.overlay = self.camera.add_overlay(image_buff, layer=3, size=(320, 240))
             _monkey_patch_picamera(self.overlay)
 
     def start(self):
@@ -98,7 +98,8 @@ class PiCameraStream(object):
                 return
 
     def read(self):
-        return self.frame[0:224, 48:272, :]  # crop the frame
+        #return self.frame[0:224, 48:272, :]  # crop the frame
+        return self.frame
 
     def stop(self):
         self.stopped = True
