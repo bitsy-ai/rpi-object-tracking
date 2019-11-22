@@ -14,8 +14,13 @@ logging.basicConfig()
 
 RESOLUTION = (320, 240)
 
-# define the range for the motors
-servoRange = (-90, 90)
+SERVO_MIN = -90
+SERVO_MAX = 90
+
+CENTER = (
+    RESOLUTION[0] // 2,
+    RESOLUTION[1] // 2
+)
 
 # function to handle keyboard interrupt
 def signal_handler(sig, frame):
@@ -29,7 +34,7 @@ def signal_handler(sig, frame):
 	# exit
 	sys.exit()
 
-def run_detect(objX, objY, labels):
+def run_detect(center_x, center_y, labels):
     model = SSDLite_MobileNet_V2_Coco()
     capture_manager = PiCameraStream()
     capture_manager.start()
@@ -47,10 +52,10 @@ def run_detect(objX, objY, labels):
                 track_target = prediction.get('detection_boxes')[0]
                 # [ymin, xmin, ymax, xmax]
                 y = RESOLUTION[1] - ((np.take(track_target, [0, 2])).mean() * RESOLUTION[1])
-                objY.value = y
+                center_y.value = y
                 x = RESOLUTION[0] - ((np.take(track_target, [1, 3])).mean() * RESOLUTION[0])
-                objX.value = x
-                logging.info(f'objX {x} objY {y}')
+                center_x.value = x
+                logging.info(f'center_x {x} center_y {y}')
 
             overlay = model.create_overlay(frame, prediction)
             capture_manager.render_overlay(overlay)
@@ -63,30 +68,21 @@ def set_servos(pan, tlt):
     # signal trap to handle keyboard interrupt
     signal.signal(signal.SIGINT, signal_handler)
 
-    # loop indefinitely
     while True:
-        # the pan and tilt angles are reversed
-        # panAngle = -1 * pan.value
-        # tltAngle = -1 * tlt.value
-        panAngle = -1 * pan.value
-        tltAngle = tlt.value
-
+        pan_angle = -1 * pan.value
+        tilt_angle = tlt.values
 
         # if the pan angle is within the range, pan
-
-        if in_range(panAngle, servoRange[0], servoRange[1]):
-            pth.pan(panAngle)
+        if in_range(pan_angle, SERVO_MIN, SERVO_MAX):
+            pth.pan(pan_angle)
         else:
-            logging.info(f'panAngle not in range {panAngle}')
-            # pan.value = 0 
-            # pth.pan(0)
+            logging.info(f'pan_angle not in range {pan_angle}')
 
-        if in_range(tltAngle, servoRange[0], servoRange[1]):
-            pth.tilt(tltAngle)
+        if in_range(tilt_angle, SERVO_MIN, SERVO_MAX):
+            pth.tilt(tilt_angle)
         else:
-            logging.info(f'tiltAngle not in range {tltAngle}')
-            # tilt.value = 0
-            # pth.tilt(0)
+            logging.info(f'tilt_angle not in range {tilt_angle}')
+
 
 def pid_process(output, p, i, d, objCoord, centerCoord, action):
     # signal trap to handle keyboard interrupt
@@ -116,64 +112,56 @@ def pantilt_process_manager(labels=('orange', 'apple', 'sports ball', 'cup', 'wi
         pth.servo_enable(1, True)
         pth.servo_enable(2, True)
 
-        # set integer values for the object center (x, y)-coordinates
-        centerX = manager.Value("i", 0)
-        centerY = manager.Value("i", 0)
-        centerX.value = RESOLUTION[0] // 2
-        centerY.value = RESOLUTION[1] // 2
+        # set initial bounding box (x, y)-coordinates to center
+        center_x = manager.Value("i", 0)
+        center_y = manager.Value("i", 0)
+        center_x.value = RESOLUTION[0] // 2
+        center_y.value = RESOLUTION[1] // 2
 
-        # set integer values for the object's (x, y)-coordinates
-        objX = manager.Value("i", 0)
-        objY = manager.Value("i", 0)
-        objX.value = RESOLUTION[0] // 2
-        objY.value = RESOLUTION[1] // 2
-
-        # pan and tilt values will be managed by independed PIDs
+        # pan and tilt angles updated by independent PID processes
         pan = manager.Value("i", 0)
         tlt = manager.Value("i", 0)
 
-        # set PID values for panning
-        panP = manager.Value("f", 0.1)
-        # panI = manager.Value("f", 0.08)
-        panI = manager.Value("f", 0.00)
-        panD = manager.Value("f", 0.01)
-        # panD = manager.Value("f", 0.1)
+        # PID gains for panning
+        pan_p = manager.Value("f", 0.1)
+        pan_i = manager.Value("f", 0.00)
+        pan_d = manager.Value("f", 0.01)
+        # pan_d = manager.Value("f", .1)
 
-        # set PID values for tilting
-        tiltP = manager.Value("f", 0.1)
-        #tiltI = manager.Value("f", 0.10)
-        #tiltD = manager.Value("f", 0.002)
-        tiltI = manager.Value("f", 0.00)
-        tiltD = manager.Value("f", 0.1)
+        # PID gains for tilt_ing
+        tilt_p = manager.Value("f", 0.1)
+        tilt_i = manager.Value("f", 0.00)
+        tilt_d = manager.Value("f", 0.1)
 
         # we have 4 independent processes
         # 1. objectCenter  - finds/localizes the object
         # 2. panning       - PID control loop determines panning angle
-        # 3. tilting       - PID control loop determines tilting angle
+        # 3. tilt_ing       - PID control loop determines tilt_ing angle
         # 4. setServos     - drives the servos to proper angles based
         #                    on PID feedback to keep object in center
-        processObjectCenter = Process(target=run_detect,
-            args=(objX, objY, labels))
+        
+        detect_processr = Process(target=run_detect,
+            args=(center_x, center_y, labels))
             
-        processPanning = Process(target=pid_process,
-            args=(pan, panP, panI, panD, objX, centerX, 'pan'))
+        pan_process = Process(target=pid_process,
+            args=(pan, pan_p, pan_i, pan_d, center_x, CENTER[0], 'pan'))
 
-        processTilting = Process(target=pid_process,
-            args=(tlt, tiltP, tiltI, tiltD, objY, centerY, 'tilt'))
+        tilt_process = Process(target=pid_process,
+            args=(tlt, tilt_p, tilt_i, tilt_d, center_y, CENTER[1], 'tilt'))
 
-        processSetServos = Process(target=set_servos, args=(pan, tlt))
+        servo_process = Process(target=set_servos, args=(pan, tlt))
 
         # start all 4 processes
-        processObjectCenter.start()
-        processPanning.start()
-        processTilting.start()
-        processSetServos.start()
+        detect_processr.start()
+        pan_process.start()
+        tilt_process.start()
+        servo_process.start()
 
         # join all 4 processes
-        processObjectCenter.join()
-        processPanning.join()
-        processTilting.join()
-        processSetServos.join()
+        detect_processr.join()
+        pan_process.join()
+        tilt_process.join()
+        servo_process.join()
 
         # disable the servos
         logging.info('disabling servos')
