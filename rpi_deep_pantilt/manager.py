@@ -1,5 +1,7 @@
+from cytypes import c_int, c_float
 import logging
-from multiprocessing import Manager, Process
+from multiprocessing import Value, Process
+
 import pantilthat as pth
 import signal
 import sys
@@ -51,10 +53,11 @@ def run_detect(center_x, center_y, labels):
 
                 track_target = prediction.get('detection_boxes')[0]
                 # [ymin, xmin, ymax, xmax]
-                y = RESOLUTION[1] - ((np.take(track_target, [0, 2])).mean() * RESOLUTION[1])
+                y = int(RESOLUTION[1] - ((np.take(track_target, [0, 2])).mean() * RESOLUTION[1]))
                 center_y.value = y
-                x = RESOLUTION[0] - ((np.take(track_target, [1, 3])).mean() * RESOLUTION[0])
+                x = int(RESOLUTION[0] - ((np.take(track_target, [1, 3])).mean() * RESOLUTION[0]))
                 center_x.value = x
+
                 logging.info(f'center_x {x} center_y {y}')
 
             overlay = model.create_overlay(frame, prediction)
@@ -106,67 +109,51 @@ def pid_process(output, p, i, d, objCoord, centerCoord, action):
 
 
 def pantilt_process_manager(labels=('orange', 'apple', 'sports ball', 'cup', 'wine glass', 'book', 'bottle', 'scissors', 'mouse')):
-    # start a manager for managing process-safe variables
-    with Manager() as manager:
-        # enable the servos
-        pth.servo_enable(1, True)
-        pth.servo_enable(2, True)
 
-        # set initial bounding box (x, y)-coordinates to center
-        center_x = manager.Value("i", 0)
-        center_y = manager.Value("i", 0)
-        center_x.value = RESOLUTION[0] // 2
-        center_y.value = RESOLUTION[1] // 2
+    pth.servo_enable(1, True)
+    pth.servo_enable(2, True)
 
-        # pan and tilt angles updated by independent PID processes
-        pan = manager.Value("i", 0)
-        tlt = manager.Value("i", 0)
+    # set initial bounding box (x, y)-coordinates to center of frame
+    center_x = Value(c_int, 0)
+    center_y = Value(c_int, 0)
 
-        # PID gains for panning
-        pan_p = manager.Value("f", 0.1)
-        pan_i = manager.Value("f", 0.00)
-        pan_d = manager.Value("f", 0.01)
-        # pan_d = manager.Value("f", .1)
+    center_x.value = RESOLUTION[0] // 2
+    center_y.value = RESOLUTION[1] // 2
 
-        # PID gains for tilt_ing
-        tilt_p = manager.Value("f", 0.1)
-        tilt_i = manager.Value("f", 0.00)
-        tilt_d = manager.Value("f", 0.1)
+    # pan and tilt angles updated by independent PID processes
+    pan = Value(c_int, 0)
+    tlt = Value(c_int, 0)
 
-        # we have 4 independent processes
-        # 1. objectCenter  - finds/localizes the object
-        # 2. panning       - PID control loop determines panning angle
-        # 3. tilt_ing       - PID control loop determines tilt_ing angle
-        # 4. setServos     - drives the servos to proper angles based
-        #                    on PID feedback to keep object in center
-        
-        detect_processr = Process(target=run_detect,
-            args=(center_x, center_y, labels))
-            
-        pan_process = Process(target=pid_process,
-            args=(pan, pan_p, pan_i, pan_d, center_x, CENTER[0], 'pan'))
+    # PID gains for panning
+    pan_p = Value(c_float, 0.1)
+    pan_i = Value(c_float, 0.00) # 0 time integral gain until inferencing is faster than ~50ms
+    pan_d = Value(c_float, 0.01)
 
-        tilt_process = Process(target=pid_process,
-            args=(tlt, tilt_p, tilt_i, tilt_d, center_y, CENTER[1], 'tilt'))
+    # PID gains for tilting
+    tilt_p = Value(c_float, 0.1)
+    tilt_i = Value(c_float, 0.00) # 0 time integral gain until inferencing is faster than ~50ms
+    tilt_d = Value(c_float, 0.1)
 
-        servo_process = Process(target=set_servos, args=(pan, tlt))
+    detect_processr = Process(target=run_detect,
+        args=(center_x, center_y, labels))
 
-        # start all 4 processes
-        detect_processr.start()
-        pan_process.start()
-        tilt_process.start()
-        servo_process.start()
+    pan_process = Process(target=pid_process,
+        args=(pan, pan_p, pan_i, pan_d, center_x, CENTER[0], 'pan'))
 
-        # join all 4 processes
-        detect_processr.join()
-        pan_process.join()
-        tilt_process.join()
-        servo_process.join()
+    tilt_process = Process(target=pid_process,
+        args=(tlt, tilt_p, tilt_i, tilt_d, center_y, CENTER[1], 'tilt'))
 
-        # disable the servos
-        logging.info('disabling servos')
-        pth.servo_enable(1, False)
-        pth.servo_enable(2, False)
+    servo_process = Process(target=set_servos, args=(pan, tlt))
+
+    detect_processr.start()
+    pan_process.start()
+    tilt_process.start()
+    servo_process.start()
+
+    detect_processr.join()
+    pan_process.join()
+    tilt_process.join()
+    servo_process.join()
 
 if __name__ == '__main__':
     pantilt_process_manager()
