@@ -67,13 +67,13 @@ def in_range(val, start, end):
     # determine the input vale is in the supplied range
     return (val >= start and val <= end)
 
-def set_servos(pan, tlt):
+def set_servos(pan, tilt):
     # signal trap to handle keyboard interrupt
     signal.signal(signal.SIGINT, signal_handler)
 
     while True:
         pan_angle = -1 * pan.value
-        tilt_angle = tlt.values
+        tilt_angle = tilt.values
 
         # if the pan angle is within the range, pan
         if in_range(pan_angle, SERVO_MIN, SERVO_MAX):
@@ -122,7 +122,7 @@ def pantilt_process_manager(labels=('orange', 'apple', 'sports ball', 'cup', 'wi
 
     # pan and tilt angles updated by independent PID processes
     pan = Value(c_int, 0)
-    tlt = Value(c_int, 0)
+    tilt = Value(c_int, 0)
 
     # PID gains for panning
     pan_p = Value(c_float, 0.1)
@@ -141,9 +141,9 @@ def pantilt_process_manager(labels=('orange', 'apple', 'sports ball', 'cup', 'wi
         args=(pan, pan_p, pan_i, pan_d, center_x, CENTER[0], 'pan'))
 
     tilt_process = Process(target=pid_process,
-        args=(tlt, tilt_p, tilt_i, tilt_d, center_y, CENTER[1], 'tilt'))
+        args=(tilt, tilt_p, tilt_i, tilt_d, center_y, CENTER[1], 'tilt'))
 
-    servo_process = Process(target=set_servos, args=(pan, tlt))
+    servo_process = Process(target=set_servos, args=(pan, tilt))
 
     detect_processr.start()
     pan_process.start()
