@@ -87,28 +87,25 @@ def set_servos(pan, tilt):
             logging.info(f'tilt_angle not in range {tilt_angle}')
 
 
-def pid_process(output, p, i, d, objCoord, centerCoord, action):
+def pid_process(output, p, i, d, box_coord, origin_coord, action):
     # signal trap to handle keyboard interrupt
     signal.signal(signal.SIGINT, signal_handler)
 
     # create a PID and initialize it
     p = PIDController(p.value, i.value, d.value)
-    p.initialize()
+    p.reset()
 
 
     # loop indefinitely
     while True:
-        # calculate the error
-        error = centerCoord.value - objCoord.value
-
-        # if error == 0:
-        #     continue
-        # else:
+        error = origin_coord.value - box_coord.value
         output.value = p.update(error)
         logging.info(f'{action} error {error} angle: {output.value}')
 
 
-def pantilt_process_manager(labels=('orange', 'apple', 'sports ball', 'cup', 'wine glass', 'book', 'bottle', 'scissors', 'mouse')):
+def pantilt_process_manager(
+    labels=('orange', 'apple', 'sports ball', 'cup', 'wine glass', 'book', 'bottle', 'scissors', 'mouse')
+    ):
 
     pth.servo_enable(1, True)
     pth.servo_enable(2, True)

@@ -3,50 +3,47 @@ import time
 
 class PIDController:
 	def __init__(self, kP=1, kI=0, kD=0):
+
 		# initialize gains
 		self.kP = kP
 		self.kI = kI
 		self.kD = kD
 
-	def initialize(self):
+	def reset(self):
 		# intialize the current and previous time
-		self.currTime = time.time()
-		self.prevTime = self.currTime
+		self.time_curr = time.time()
+		self.time_prev = self.time_curr
 
 		# initialize the previous error
-		self.prevError = 0
+		self.error_prev = 0
 
 		# initialize the term result variables
 		self.cP = 0
 		self.cI = 0
 		self.cD = 0
 
-	def update(self, error, sleep=0.001):
-		# pause for a bit
-		time.sleep(sleep)
-
-		# grab the current time and calculate delta time
-		self.currTime = time.time()
-		deltaTime = self.currTime - self.prevTime
-
-		# delta error
-		deltaError = error - self.prevError
+	def update(self, error):
+		# grab the current time and calculate delta time / error
+		self.time_curr = time.time()
+		time_delta = self.time_curr - self.time_prev
+		error_deltar = error - self.error_prev
 
 		# proportional term
 		self.cP = error
 
 		# integral term
-		self.cI += error * deltaTime
+		self.cI += error * time_delta
 
 		# derivative term and prevent divide by zero
-		self.cD = (deltaError / deltaTime) if deltaTime > 0 else 0
+		self.cD = (error_deltar / time_delta) if time_delta > 0 else 0
 
 		# save previous time and error for the next update
-		self.prevTime = self.currTime
-		self.prevError = error
+		self.time_prev = self.time_curr
+		self.error_prev = error
 
 		# sum the terms and return
 		return sum([
 			self.kP * self.cP,
 			self.kI * self.cI,
-			self.kD * self.cD])
+			self.kD * self.cD]
+        )
