@@ -89,7 +89,7 @@ install: clean ## install the package to the active Python's site-packages
 
 rpi-deps:
 	sudo apt-get update && sudo apt-get install -y \
-	cmake python3-dev libjpeg-dev libatlas-base-dev raspi-gpio libhdf5-dev
+	cmake python3-dev libjpeg-dev libatlas-base-dev raspi-gpio libhdf5-dev python3-smbus
 	
 protoc: rpi-deps
 	cd models/research/ && protoc object_detection/protos/*.proto --python_out=.

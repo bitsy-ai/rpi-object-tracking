@@ -31,7 +31,7 @@ trainer_requirements = list(map(
 ))
 
 rpi_requirements = [
-    
+    'smbus',
     'picamera',
     'pantilthat>=0.0.7',
     'tensorflow@https://github.com/PINTO0309/Tensorflow-bin/blob/master/tensorflow-2.0.0-cp37-cp37m-linux_armv7l.whl?raw=true'

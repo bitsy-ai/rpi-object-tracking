@@ -7,18 +7,14 @@ import pathlib
 import tensorflow as tf
 import numpy as np
 from PIL import Image
+import PIL.ImageDraw as ImageDraw
 
 from object_detection.utils import label_map_util
 import object_detection.utils.visualization_utils as vis_util
 from object_detection.models.keras_models.mobilenet_v2 import mobilenet_v2
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input, decode_predictions
 
-
-# App
-from .camera import PiCameraStream
-
-logging.basicConfig()
-
+logging.getLogger().setLevel(logging.INFO)
 # ssdlite_mobilenet_v2_coco_2018_05_09
 
 class SSDLite_MobileNet_V2_Coco(object):
@@ -29,13 +25,7 @@ class SSDLite_MobileNet_V2_Coco(object):
         self,
         base_url='http://download.tensorflow.org/models/object_detection/',
         model_name='ssdlite_mobilenet_v2_coco_2018_05_09',
-        input_shape=(256,256),
-        resolution=(320, 240),
-        framerate=24,
-        vflip=False,
-        hflip=False,
-        rotation=0
-
+        input_shape=(320, 240)
     ):
 
         self.base_url = base_url
@@ -64,10 +54,20 @@ class SSDLite_MobileNet_V2_Coco(object):
         logging.info(f'model outputs: {self.model.output_dtypes} \n {self.model.output_shapes}')
         #logging.info(f'model summary: {self.model.summary}')
 
-    def create_overlay(self, image_np, output_dict):
+    def label_to_category_index(self, labels):
+        # @todo :trashfire:
+        return tuple(map(
+            lambda x: x['id'],
+            filter(
+                lambda x: x['name'] in labels, self.category_index.values()
+            )
+        ))
+    
+    def create_overlay(self, image_np, output_dict, draw_target=None):
 
         image_np = image_np.copy()
 
+        # draw bounding boxes
         vis_util.visualize_boxes_and_labels_on_image_array(
             image_np,
             output_dict['detection_boxes'],
@@ -77,8 +77,23 @@ class SSDLite_MobileNet_V2_Coco(object):
             instance_masks=output_dict.get('detection_masks_reframed', None),
             use_normalized_coordinates=True,
             line_thickness=8)
+
+        # draw centroid
+        img = Image.fromarray(image_np)
+        if draw_target is not None:
+            # (uleft, uright, bright, bleft)
+
+            xx = draw_target[:2].mean()
+            yy = draw_target[2:].mean()
+
+            draw = ImageDraw.Draw(img)
+            draw.point([(xx, yy)], fill='black')
         
-        return Image.fromarray(image_np).tobytes()
+        return img.tobytes()
+    
+    def calc_center(self, output_dict):
+        import pdb; pdb.set_trace()
+        return output_dict
 
     def predict(self, image):
         '''
