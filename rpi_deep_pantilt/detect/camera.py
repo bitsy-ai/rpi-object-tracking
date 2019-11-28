@@ -31,6 +31,7 @@ def _monkey_patch_picamera(overlay):
 
     picamera.mmalobj.MMALPortPool.send_buffer = silent_send_buffer
 
+
 class PiCameraStream(object):
     """
       Continuously capture video frames, and optionally render with an overlay
@@ -43,16 +44,17 @@ class PiCameraStream(object):
 
     """
 
-    def __init__(self, 
-        resolution=(320, 240), 
-        framerate=24, 
-        vflip=False,
-        hflip=False,
-        rotation=0,
-        max_workers=2
-    ):
+    def __init__(self,
+                 resolution=(320, 240),
+                 framerate=24,
+                 vflip=False,
+                 hflip=False,
+                 rotation=0,
+                 max_workers=2
+                 ):
 
         #self.pool = ThreadPoolExecutor(max_workers=max_workers)
+
         self.camera = PiCamera()
         self.camera.resolution = resolution
         self.camera.framerate = framerate
@@ -67,17 +69,24 @@ class PiCameraStream(object):
             self.data_container, format="rgb", use_video_port=True
         )
 
+        self.overlay_buff = None
         self.frame = None
         self.stopped = False
         logging.info('starting camera preview')
         self.camera.start_preview()
 
-    def render_overlay(self, image_buff):
-        if self.overlay:
-            self.overlay.update(image_buff)
-        else:
-            self.overlay = self.camera.add_overlay(image_buff, layer=3, size=(320, 240))
-            _monkey_patch_picamera(self.overlay)
+    def render_overlay(self):
+        while True:
+            if self.overlay and self.overlay_buff:
+                self.overlay.update(self.overlay_buff)
+            elif not self.overlay and self.overlay_buff:
+                self.overlay = self.camera.add_overlay(
+                    self.overlay_buff, layer=3, size=self.camera.resolution)
+                _monkey_patch_picamera(self.overlay)
+
+    def start_overlay(self):
+        Thread(target=self.render_overlay, args=()).start()
+        return self
 
     def start(self):
         '''Begin handling frame stream in a separate thread'''
@@ -98,7 +107,6 @@ class PiCameraStream(object):
                 return
 
     def read(self):
-        #return self.frame[0:224, 48:272, :]  # crop the frame
         return self.frame
 
     def stop(self):
