@@ -1,5 +1,6 @@
 import logging
 from multiprocessing import Value, Process, Manager
+import time
 
 import pantilthat as pth
 import signal
@@ -14,6 +15,7 @@ from detect.models.ssd_mobilenet_v3_coco import SSDMobileNet_V3_Small_Coco_PostP
 from control.pid import PIDController
 
 logging.basicConfig()
+LOGLEVEL = logging.getLogger().getEffectiveLevel()
 
 RESOLUTION = (320, 320)
 
@@ -47,6 +49,8 @@ def run_detect(center_x, center_y, labels):
     capture_manager.start_overlay()
 
     label_idxs = model.label_to_category_index(labels)
+    start_time = time.time()
+    fps_counter = 0
     while not capture_manager.stopped:
         if capture_manager.frame is not None:
             frame = capture_manager.read()
@@ -77,12 +81,15 @@ def run_detect(center_x, center_y, labels):
                 display_name = model.category_index[tracked_classes[0]]['name']
                 logging.info(
                     f'Tracking {display_name} center_x {x} center_y {y}')
-            # else:
-            #     logging.info('RESET CENTER')
-            #     center_x.value = CENTER[0]
-            #     center_y.value = CENTER[1]
+
             overlay = model.create_overlay(frame, prediction)
             capture_manager.overlay_buff = overlay
+            if LOGLEVEL is logging.DEBUG and (time.time() - start_time) > 1:
+                fps_counter += 1
+                fps = fps_counter / (time.time() - start_time)
+                logging.debug(f'FPS: {fps}')
+                fps_counter = 0
+                start_time = time.time()
 
 
 def in_range(val, start, end):
