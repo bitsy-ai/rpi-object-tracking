@@ -13,12 +13,13 @@ with open('HISTORY.rst') as history_file:
 
 
 common_requirements = [
-    'Click>=7.0', 
+    'Click>=7.0',
     'tensorflow-hub',
     'pillow',
     'pycocotools',
     'jupyter',
-    'h5py'
+    'h5py',
+    # 'opencv-python'
 ]
 
 trainer_requirements = [
@@ -85,7 +86,8 @@ setup(
     include_package_data=True,
     keywords='c',
     name='rpi_deep_pantilt',
-    packages=find_packages(include=['rpi_deep_pantilt', 'rpi_deep_pantilt.*']),
+    packages=find_packages(include=[
+                           'rpi_deep_pantilt', 'rpi_deep_pantilt.*', 'models', 'models.*']),
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,

@@ -91,6 +91,9 @@ rpi-deps:
 	sudo apt-get update && sudo apt-get install -y \
 	cmake python3-dev libjpeg-dev libatlas-base-dev raspi-gpio libhdf5-dev python3-smbus
 	
+	##libjasper1 libilmbase-dev libopenexr-dev libgstreamer1.0-dev libqtgui4 libqt4-test libqtcore4 \
+	##libatlas3-base libwebp6 libtiff5 libopenexr23
+	
 protoc: rpi-deps
 	cd models/research/ && protoc object_detection/protos/*.proto --python_out=.
 	pip install .
