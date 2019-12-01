@@ -21,8 +21,6 @@ from object_detection.core import post_processing
 
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input, decode_predictions
 
-logging.getLogger().setLevel(logging.INFO)
-
 class SSDMobileNet_V3_Small_Coco_PostProcessed(object):
 
     PATH_TO_LABELS = 'lib/tensorflow_models/research/object_detection/data/mscoco_label_map.pbtxt'

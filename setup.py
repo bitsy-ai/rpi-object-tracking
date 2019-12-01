@@ -100,7 +100,7 @@ setup(
     description="An example of deep object detection and tracking with a Raspberry Pi, PiCamera, and Pimoroni Pantilt Hat",
     entry_points={
         'console_scripts': [
-            'rpi_deep_pantilt=rpi_deep_pantilt.cli:main',
+            'rpi-deep-pantilt=rpi_deep_pantilt.cli:main',
         ],
     },
     cmdclass={'build_py': BuildCommand},
