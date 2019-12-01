@@ -25,7 +25,7 @@ logging.getLogger().setLevel(logging.INFO)
 
 class SSDMobileNet_V3_Small_Coco_PostProcessed(object):
 
-    PATH_TO_LABELS = 'models/research/object_detection/data/mscoco_label_map.pbtxt'
+    PATH_TO_LABELS = 'tensorflow_models/research/object_detection/data/mscoco_label_map.pbtxt'
 
     # http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v3_small_coco_2019_08_14.tar.gz
 
