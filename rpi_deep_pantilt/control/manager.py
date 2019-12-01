@@ -7,12 +7,9 @@ import signal
 import sys
 import numpy as np
 
-from detect.camera import PiCameraStream
-from detect.models.ssd_mobilenet_v3_coco import SSDMobileNet_V3_Small_Coco_PostProcessed
-
-# from detect.model import SSDLite_MobileNet_V2_Coco, SSDMobileNet_V3_Small_Coco
-
-from control.pid import PIDController
+from rpi_deep_pantilt.detect.camera import PiCameraStream
+from rpi_deep_pantilt.detect.models.ssd_mobilenet_v3_coco import SSDMobileNet_V3_Small_Coco_PostProcessed
+from rpi_deep_pantilt.control.pid import PIDController
 
 logging.basicConfig()
 LOGLEVEL = logging.getLogger().getEffectiveLevel()
@@ -137,7 +134,6 @@ def pid_process(output, p, i, d, box_coord, origin_coord, action):
 
 def pantilt_process_manager(
     labels=('person',)
-
 ):
 
     pth.servo_enable(1, True)
