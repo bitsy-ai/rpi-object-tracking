@@ -16,6 +16,7 @@ Status](https://readthedocs.org/projects/rpi-deep-pantilt/badge/?version=latest)
   - Micro HDMI Cable
   - [12" CSI/DSI ribbon for Raspberry Pi Camera](https://www.adafruit.com/product/1648) (optional, but highly recommended)
   - [Coral Edge TPU USB Accelerator](https://coral.withgoogle.com/products/accelerator) (optional)
+  - [RGB NeoPixel Stick](https://www.adafruit.com/product/1426) (optional, makes lighting conditions more consistent)
 
 An example of deep object detection and tracking with a Raspberry Pi
 
