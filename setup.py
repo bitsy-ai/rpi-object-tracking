@@ -107,6 +107,7 @@ setup(
     install_requires=requirements,
     license="MIT license",
     long_description=readme + '\n\n' + history,
+    long_description_content_type='text/markdown',
     include_package_data=True,
     keywords='computer vision cv tensorflow raspberrypi detection tracking ',
     name='rpi_deep_pantilt',
@@ -118,4 +119,5 @@ setup(
     url='https://github.com/leigh-johnson/rpi_deep_pantilt',
     version='1.0.0rc',
     zip_safe=False,
+
 )
