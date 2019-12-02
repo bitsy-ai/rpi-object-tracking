@@ -1,3 +1,7 @@
+# ignore un-tar'd files in models/ folder
+models/*
+!*.tar.gz
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

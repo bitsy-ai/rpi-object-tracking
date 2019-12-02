@@ -79,8 +79,11 @@ servedocs: docs ## compile the docs watching for changes
 release: dist ## package and upload a release
 	twine upload dist/*
 
-dist: clean ## builds source and wheel package
+sdist: clean ## builds source and wheel package
 	python setup.py sdist
+	ls -l dist
+
+bdist_wheel: clean ## builds source and wheel package
 	python setup.py bdist_wheel
 	ls -l dist
 
@@ -94,6 +97,5 @@ rpi-deps:
 	##libjasper1 libilmbase-dev libopenexr-dev libgstreamer1.0-dev libqtgui4 libqt4-test libqtcore4 \
 	##libatlas3-base libwebp6 libtiff5 libopenexr23
 	
-protoc: rpi-deps
-	cd models/research/ && protoc object_detection/protos/*.proto --python_out=.
-	pip install .
+protoc:
+	cd $$(python -c 'from distutils.sysconfig import get_python_lib; print(get_python_lib())') && protoc object_detection/protos/*.proto --python_out=.
