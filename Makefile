@@ -79,8 +79,12 @@ servedocs: docs ## compile the docs watching for changes
 release: dist ## package and upload a release
 	twine upload dist/*
 
-dist: clean ## builds source and wheel package
+sdist: clean ## builds source and wheel package
 	python setup.py sdist
+	python setup.py bdist_wheel
+	ls -l dist
+
+bdist_wheel: clean ## builds source and wheel package
 	python setup.py bdist_wheel
 	ls -l dist
 
@@ -96,4 +100,3 @@ rpi-deps:
 	
 protoc:
 	cd $$(python -c 'from distutils.sysconfig import get_python_lib; print(get_python_lib())') && protoc object_detection/protos/*.proto --python_out=.
-	# pip install .
