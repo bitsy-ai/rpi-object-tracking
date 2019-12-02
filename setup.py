@@ -117,7 +117,7 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/leigh-johnson/rpi_deep_pantilt',
-    version='1.0.0rc',
+    version='1.0.0rc1',
     zip_safe=False,
 
 )
