@@ -5,6 +5,8 @@
 
 from setuptools import setup, find_packages
 from setuptools.command.build_py import build_py
+from setuptools.command.install import install
+
 import subprocess
 import sys
 
@@ -23,7 +25,6 @@ common_requirements = [
     'pycocotools',
     'jupyter',
     'h5py',
-    'object-detection @ git+https://github.com/leigh-johnson/models@tf-compat-patch#egg=object_detection&subdirectory=research'
 ]
 
 trainer_requirements = [
@@ -67,6 +68,19 @@ TRAINER_DARWIN_CUSTOM_COMMANDS = [['brew', 'update'],
                                   ]
 
 
+# $pip install rpi-deep-pantilt==1.0.0rc3
+# Looking in indexes: https://pypi.org/simple, https://www.piwheels.org/simple
+# Collecting rpi-deep-pantilt==1.0.0rc3
+#   Using cached https://files.pythonhosted.org/packages/91/d0/aba792a5fc8d50b8e7fcbd24ceb438d106cc9eb294760211468bf3400f6f/rpi_deep_pantilt-1.0.0rc3.tar.gz
+# ERROR: Packages installed from PyPI cannot depend on packages which are not also hosted on PyPI.
+# rpi-deep-pantilt depends on object-detection@ git+https://github.com/leigh-johnson/models@tf-compat-patch#egg=object_detection&subdirectory=research
+class PostInstall(install):
+    git_eggs = ' git+https://github.com/leigh-johnson/models@tf-compat-patch#egg=object_detection&subdirectory=research'
+    def run(self):
+        install.run(self)
+        #https://pip.pypa.io/en/stable/user_guide/#using-pip-from-your-program
+        subprocess.call([sys.executable, '-m', 'pip', 'install', self.git_eggs])
+
 class BuildCommand(build_py):
     '''Extend setuptools build to deserialize protos on build.'''
 
@@ -103,7 +117,7 @@ setup(
             'rpi-deep-pantilt=rpi_deep_pantilt.cli:main',
         ],
     },
-    cmdclass={'build_py': BuildCommand},
+    cmdclass={'build_py': BuildCommand, 'install': PostInstall },
     install_requires=requirements,
     license="MIT license",
     long_description=readme + '\n\n' + history,
