@@ -12,7 +12,7 @@ To install Raspberry Pi Deep PanTilt, run this command in your terminal:
 
 .. code-block:: console
 
-    $ pip install rpi_deep_pantilt
+    $ pip install rpi-deep-pantilt
 
 This is the preferred method to install Raspberry Pi Deep PanTilt, as it will always install the most recent stable release.
 
@@ -32,13 +32,13 @@ You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/leigh-johnson/rpi_deep_pantilt
+    $ git clone git://github.com/leigh-johnson/rpi-deep-pantilt
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl -OJL https://github.com/leigh-johnson/rpi_deep_pantilt/tarball/master
+    $ curl -OJL https://github.com/leigh-johnson/rpi-deep-pantilt/tarball/master
 
 Once you have a copy of the source, you can install it with:
 
