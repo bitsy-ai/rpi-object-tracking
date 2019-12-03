@@ -1,26 +1,14 @@
 # Python
-import argparse
 import logging
 import pathlib
 
 # lib
-from google.protobuf import text_format
 import numpy as np
 from PIL import Image
-import PIL.ImageDraw as ImageDraw
 import tensorflow as tf
 
-# from object_detection import export_tflite_ssd_graph
-
-import object_detection.data as object_detection_data
-from object_detection.protos import pipeline_pb2
-from object_detection.utils import label_map_util
-import object_detection.utils.visualization_utils as vis_util
-import object_detection.utils.ops as utils_ops
-from object_detection.models.keras_models.mobilenet_v2 import mobilenet_v2
-from object_detection.core import post_processing
-
-from tensorflow.keras.applications.mobilenet_v2 import preprocess_input, decode_predictions
+from object_detection.utils.label_map_util import create_category_index_from_labelmap
+from object_detection.utils.visualization_utils import visualize_boxes_and_labels_on_image_array
 
 
 class SSDMobileNet_V3_Small_Coco_PostProcessed(object):
@@ -57,7 +45,7 @@ class SSDMobileNet_V3_Small_Coco_PostProcessed(object):
         self.input_details = self.tflite_interpreter.get_input_details()
         self.output_details = self.tflite_interpreter.get_output_details()
 
-        self.category_index = label_map_util.create_category_index_from_labelmap(
+        self.category_index = create_category_index_from_labelmap(
             self.PATH_TO_LABELS, use_display_name=True)
 
         logging.info(
@@ -86,7 +74,7 @@ class SSDMobileNet_V3_Small_Coco_PostProcessed(object):
         image_np = image_np.copy()
 
         # draw bounding boxes
-        vis_util.visualize_boxes_and_labels_on_image_array(
+        visualize_boxes_and_labels_on_image_array(
             image_np,
             output_dict['detection_boxes'],
             output_dict['detection_classes'],
