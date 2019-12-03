@@ -7,14 +7,14 @@ import numpy as np
 from PIL import Image
 import tensorflow as tf
 
-from object_detection.utils.label_map_util import create_category_index_from_labelmap
-from object_detection.utils.visualization_utils import visualize_boxes_and_labels_on_image_array
+from rpi_deep_pantilt import __path__ as rpi_deep_pantilt_path
+from rpi_deep_pantilt.detect.util.label import create_category_index_from_labelmap
+from rpi_deep_pantilt.detect.util.visualization import visualize_boxes_and_labels_on_image_array
 
 
 class SSDMobileNet_V3_Small_Coco_PostProcessed(object):
 
-    PATH_TO_LABELS = tuple(object_detection_data.__path__)[
-        0] + '/mscoco_label_map.pbtxt'
+    PATH_TO_LABELS = rpi_deep_pantilt_path[0] + '/data/mscoco_label_map.pbtxt'
 
     def __init__(
         self,

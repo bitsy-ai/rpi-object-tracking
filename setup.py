@@ -76,10 +76,13 @@ TRAINER_DARWIN_CUSTOM_COMMANDS = [['brew', 'update'],
 # rpi-deep-pantilt depends on object-detection@ git+https://github.com/leigh-johnson/models@tf-compat-patch#egg=object_detection&subdirectory=research
 class PostInstall(install):
     git_eggs = ' git+https://github.com/leigh-johnson/models@tf-compat-patch#egg=object_detection&subdirectory=research'
+
     def run(self):
         install.run(self)
-        #https://pip.pypa.io/en/stable/user_guide/#using-pip-from-your-program
-        subprocess.call([sys.executable, '-m', 'pip', 'install', self.git_eggs])
+        # https://pip.pypa.io/en/stable/user_guide/#using-pip-from-your-program
+        subprocess.call([sys.executable, '-m', 'pip',
+                         'install', self.git_eggs])
+
 
 class BuildCommand(build_py):
     '''Extend setuptools build to deserialize protos on build.'''
@@ -117,7 +120,7 @@ setup(
             'rpi-deep-pantilt=rpi_deep_pantilt.cli:main',
         ],
     },
-    cmdclass={'build_py': BuildCommand, 'install': PostInstall },
+    # cmdclass={'build_py': BuildCommand, 'install': PostInstall},
     install_requires=requirements,
     license="MIT license",
     long_description=readme + '\n\n' + history,
