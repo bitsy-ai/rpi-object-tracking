@@ -20,10 +20,7 @@ with open('HISTORY.md') as history_file:
 
 common_requirements = [
     'Click>=7.0',
-    'tensorflow-hub',
     'pillow',
-    'pycocotools',
-    'jupyter',
     'h5py',
 ]
 
@@ -79,25 +76,6 @@ class PostInstall(install):
         # https://pip.pypa.io/en/stable/user_guide/#using-pip-from-your-program
         subprocess.call([sys.executable, '-m', 'pip',
                          'install', deps])
-
-
-# class BuildCommand(build_py):
-#     '''Extend setuptools build to deserialize protos on build.'''
-
-#     def run(self):
-#         cmd = [sys.executable, '-m', 'pip',
-#                'install', self.git_eggs]
-#         p = subprocess.Popen(
-#             cmd,
-#             stdin=subprocess.PIPE,
-#             stdout=subprocess.PIPE,
-#             stderr=subprocess.STDOUT)
-#         stdout, stderr = p.communicate()
-#         print(f'Command output: {stdout}')
-#         if p.returncode != 0:
-#             raise RuntimeError(
-#                 f'{cmd} failed: exit code: {p.returncode} \n {stderr}')
-#         build_py.run(self)
 
 
 setup(
