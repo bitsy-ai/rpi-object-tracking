@@ -40,7 +40,6 @@ rpi_requirements = [
     'smbus',
     'picamera',
     'pantilthat>=0.0.7',
-    'tensorflow@https://github.com/leigh-johnson/Tensorflow-bin/blob/master/tensorflow-2.0.0-cp37-cp37m-linux_armv7l.whl?raw=true'
 ]
 
 rpi_requirements = list(map(
@@ -69,37 +68,36 @@ TRAINER_DARWIN_CUSTOM_COMMANDS = [['brew', 'update'],
 
 
 # $pip install rpi-deep-pantilt==1.0.0rc3
-# Looking in indexes: https://pypi.org/simple, https://www.piwheels.org/simple
-# Collecting rpi-deep-pantilt==1.0.0rc3
-#   Using cached https://files.pythonhosted.org/packages/91/d0/aba792a5fc8d50b8e7fcbd24ceb438d106cc9eb294760211468bf3400f6f/rpi_deep_pantilt-1.0.0rc3.tar.gz
 # ERROR: Packages installed from PyPI cannot depend on packages which are not also hosted on PyPI.
-# rpi-deep-pantilt depends on object-detection@ git+https://github.com/leigh-johnson/models@tf-compat-patch#egg=object_detection&subdirectory=research
+# rpi-deep-pantilt depends on tensorflow@ https://github.com/leigh-johnson/Tensorflow-bin/blob/master/tensorflow-2.0.0-cp37-cp37m-linux_armv7l.whl?raw=true;platform_machine=="armv7l"
 class PostInstall(install):
-    git_eggs = ' git+https://github.com/leigh-johnson/models@tf-compat-patch#egg=object_detection&subdirectory=research'
 
     def run(self):
+        deps = 'https://github.com/leigh-johnson/Tensorflow-bin/blob/master/tensorflow-2.0.0-cp37-cp37m-linux_armv7l.whl?raw=true'
+
         install.run(self)
         # https://pip.pypa.io/en/stable/user_guide/#using-pip-from-your-program
         subprocess.call([sys.executable, '-m', 'pip',
-                         'install', self.git_eggs])
+                         'install', deps])
 
 
-class BuildCommand(build_py):
-    '''Extend setuptools build to deserialize protos on build.'''
+# class BuildCommand(build_py):
+#     '''Extend setuptools build to deserialize protos on build.'''
 
-    def run(self):
-        cmd = ['make', 'protoc']
-        p = subprocess.Popen(
-            cmd,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT)
-        stdout, stderr = p.communicate()
-        print(f'Command output: {stdout}')
-        if p.returncode != 0:
-            raise RuntimeError(
-                f'{cmd} failed: exit code: {p.returncode} \n {stderr}')
-        build_py.run(self)
+#     def run(self):
+#         cmd = [sys.executable, '-m', 'pip',
+#                'install', self.git_eggs]
+#         p = subprocess.Popen(
+#             cmd,
+#             stdin=subprocess.PIPE,
+#             stdout=subprocess.PIPE,
+#             stderr=subprocess.STDOUT)
+#         stdout, stderr = p.communicate()
+#         print(f'Command output: {stdout}')
+#         if p.returncode != 0:
+#             raise RuntimeError(
+#                 f'{cmd} failed: exit code: {p.returncode} \n {stderr}')
+#         build_py.run(self)
 
 
 setup(
@@ -120,7 +118,7 @@ setup(
             'rpi-deep-pantilt=rpi_deep_pantilt.cli:main',
         ],
     },
-    # cmdclass={'build_py': BuildCommand, 'install': PostInstall},
+    cmdclass={'install': PostInstall},
     install_requires=requirements,
     license="MIT license",
     long_description=readme + '\n\n' + history,
