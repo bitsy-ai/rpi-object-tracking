@@ -79,11 +79,11 @@ servedocs: docs ## compile the docs watching for changes
 release: dist ## package and upload a release
 	twine upload dist/*
 
-sdist: clean ## builds source and wheel package
+sdist: clean ## builds source package
 	python setup.py sdist
 	ls -l dist
 
-bdist_wheel: clean ## builds source and wheel package
+bdist_wheel: clean ## builds wheel package
 	python setup.py bdist_wheel
 	ls -l dist
 

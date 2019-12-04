@@ -9,7 +9,7 @@ import click
 import numpy as np
 
 from rpi_deep_pantilt.detect.camera import PiCameraStream
-from rpi_deep_pantilt.detect.models.ssd_mobilenet_v3_coco import SSDMobileNet_V3_Small_Coco_PostProcessed
+from rpi_deep_pantilt.detect.ssd_mobilenet_v3_coco import SSDMobileNet_V3_Small_Coco_PostProcessed
 from rpi_deep_pantilt.control.manager import pantilt_process_manager
 
 
@@ -43,7 +43,7 @@ def run_detect(capture_manager, model):
 
 @cli.command()
 @click.option('--loglevel', required=False, type=str, default='WARNING', help='Run object detection without pan-tilt controls. Pass --loglevel=DEBUG to inspect FPS.')
-def detect(label, loglevel):
+def detect(loglevel):
     level = logging.getLevelName(loglevel)
     logging.getLogger().setLevel(level)
 
