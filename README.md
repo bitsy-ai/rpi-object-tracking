@@ -68,7 +68,7 @@ Options:
 
 The following will start a PiCamera preview, render detected objects as an overlay, and track an object's movement with the pan-tilt HAT. 
 
-By default, this will track any `person` in the frame. You can track other objects by passing the `--label`
+By default, this will track any `person` in the frame. You can track other objects by passing `--label <label>`. For a list of valid labels, run `rpi-deep-pantilt list-labels`. 
 
 `rpi-deep-pantilt track`
 
@@ -83,6 +83,8 @@ Options:
   --loglevel TEXT
   --help           Show this message and exit.
 ```
+
+## Valid labels
 
 `rpi-deep-pantilt list-labels`
 
