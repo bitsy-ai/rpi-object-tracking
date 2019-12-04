@@ -51,7 +51,7 @@ pip install rpi-deep-pantilt
 
 The following will start a PiCamera preview and render detected objects as an overlay. Ensure you're able to detect an object before trying to track it. 
 
-### `rpi-deep-pantilt detect`
+`rpi-deep-pantilt detect`
 
 ```
 rpi-deep-pantilt detect --help
@@ -70,7 +70,7 @@ The following will start a PiCamera preview, render detected objects as an overl
 
 By default, this will track any `person` in the frame. You can track other objects by passing the `--label`
 
-### `rpi-deep-pantilt track`
+`rpi-deep-pantilt track`
 
 ```
 rpi-deep-pantilt track --help 
@@ -84,7 +84,7 @@ Options:
   --help           Show this message and exit.
 ```
 
-### `rpi-deep-pantilt list-labels`
+`rpi-deep-pantilt list-labels`
 
 The following labels are valid tracking targets.
 
