@@ -105,7 +105,8 @@ setup(
     keywords='computer vision cv tensorflow raspberrypi detection tracking ',
     name='rpi_deep_pantilt',
     packages=find_packages(include=[
-                           'rpi_deep_pantilt', 'rpi_deep_pantilt.*', 'models', 'models.*']),
+                           'rpi_deep_pantilt', 'rpi_deep_pantilt.*']),
+    package_data={'rpi_deep_pantilt': ['data/*.pbtxt']},
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
