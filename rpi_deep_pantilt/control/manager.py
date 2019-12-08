@@ -126,7 +126,7 @@ def pid_process(output, p, i, d, box_coord, origin_coord, action):
     while True:
         error = origin_coord - box_coord.value
         output.value = p.update(error)
-        logging.info(f'{action} error {error} angle: {output.value}')
+        # logging.info(f'{action} error {error} angle: {output.value}')
 
 # ('person',)
 #('orange', 'apple', 'sports ball')

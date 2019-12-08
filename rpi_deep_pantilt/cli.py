@@ -33,22 +33,23 @@ def run_detect(capture_manager, model):
             overlay = model.create_overlay(
                 frame, prediction)
             capture_manager.overlay_buff = overlay
-            # only perform fps calculations if loglevel.DEBUG set
-            if LOGLEVEL is logging.DEBUG and (time.time() - start_time) > 1:
+            if LOGLEVEL <= logging.INFO:
                 fps_counter += 1
-                fps = fps_counter / (time.time() - start_time)
-                logging.debug(f'FPS: {fps}')
-                fps_counter = 0
-                start_time = time.time()
+                if (time.time() - start_time) > 1:
+                    fps = fps_counter / (time.time() - start_time)
+                    logging.info(f'FPS: {fps}')
+                    fps_counter = 0
+                    start_time = time.time()
 
 
 @cli.command()
 @click.option('--loglevel', required=False, type=str, default='WARNING', help='Run object detection without pan-tilt controls. Pass --loglevel=DEBUG to inspect FPS.')
-def detect(loglevel):
+@click.option('--edge-tpu', is_flag=True, required=False, type=bool, default=False, help='Accelerate inferences using Coral USB Edge TPU')
+def detect(loglevel, edge_tpu):
     level = logging.getLevelName(loglevel)
     logging.getLogger().setLevel(level)
 
-    model = SSDMobileNet_V3_Small_Coco_PostProcessed()
+    model = SSDMobileNet_V3_Small_Coco_PostProcessed(edge_tpu=edge_tpu)
     capture_manager = PiCameraStream(resolution=(320, 320))
     capture_manager.start()
     capture_manager.start_overlay()

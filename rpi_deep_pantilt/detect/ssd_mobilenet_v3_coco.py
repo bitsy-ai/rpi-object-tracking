@@ -14,19 +14,22 @@ from rpi_deep_pantilt.detect.util.visualization import visualize_boxes_and_label
 
 class SSDMobileNet_V3_Small_Coco_PostProcessed(object):
 
+    EDGETPU_SHARED_LIB = 'libedgetpu.so.1'
     PATH_TO_LABELS = rpi_deep_pantilt_path[0] + '/data/mscoco_label_map.pbtxt'
 
     def __init__(
         self,
         base_url='https://github.com/leigh-johnson/rpi-deep-pantilt/raw/master/models/',
         model_name='ssd_mobilenet_v3_small_coco_2019_08_14',
-        input_shape=(320, 320)
+        input_shape=(320, 320),
+        edge_tpu=False
     ):
 
         self.base_url = base_url
         self.model_name = model_name
         self.model_file = model_name + '.tar.gz'
         self.model_url = base_url + self.model_file
+        self.edge_tpu = edge_tpu
 
         self.model_dir = tf.keras.utils.get_file(
             fname=model_name,
@@ -37,9 +40,19 @@ class SSDMobileNet_V3_Small_Coco_PostProcessed(object):
         self.model_path = str(pathlib.Path(self.model_dir)
                               ) + '/model_postprocessed.tflite'
 
-        self.tflite_interpreter = tf.lite.Interpreter(
-            model_path=self.model_path
-        )
+        if self.edge_tpu:
+            logging.info(
+                f'Loading {self.EDGETPU_SHARED_LIB} via tf.lite.experimental.load_delegate()')
+            self.tflite_interpreter = tf.lite.Interpreter(
+                model_path=self.model_path,
+                experimental_delegates=[
+                    tf.lite.experimental.load_delegate(self.EDGETPU_SHARED_LIB)
+                ]
+            )
+        else:
+            self.tflite_interpreter = tf.lite.Interpreter(
+                model_path=self.model_path,
+            )
         self.tflite_interpreter.allocate_tensors()
 
         self.input_details = self.tflite_interpreter.get_input_details()
