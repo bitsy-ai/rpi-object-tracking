@@ -3,12 +3,25 @@ import math
 import time
 
 import pantilthat
+from picamera import PiCamera
+
 
 # https://github.com/pimoroni/pantilt-hat/blob/master/examples/smooth.py
 
 
 def camera_test():
-    pass
+    pantilthat.pan(0)
+    pantilthat.tilt(0)
+    camera = PiCamera()
+    logging.info('Starting Raspberry Pi Camera')
+    camera.start_preview()
+
+    try:
+        while True:
+            continue
+    except KeyboardInterrupt:
+        logging.info('Stopping Raspberry Pi Camera')
+        camera.stop_preview()
 
 
 def pantilt_test():

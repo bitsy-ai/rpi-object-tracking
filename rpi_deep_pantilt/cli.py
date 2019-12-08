@@ -91,6 +91,14 @@ def pantilt(loglevel):
     return pantilt_test()
 
 
+@test.command()
+@click.option('--loglevel', required=False, type=str, default='INFO')
+def camera(loglevel):
+    level = logging.getLevelName(loglevel)
+    logging.getLogger().setLevel(level)
+    return camera_test()
+
+
 def main():
     cli()
 
