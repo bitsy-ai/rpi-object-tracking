@@ -11,6 +11,7 @@ import numpy as np
 from rpi_deep_pantilt.detect.camera import PiCameraStream
 from rpi_deep_pantilt.detect.ssd_mobilenet_v3_coco import SSDMobileNet_V3_Small_Coco_PostProcessed
 from rpi_deep_pantilt.control.manager import pantilt_process_manager
+from rpi_deep_pantilt.control.hardware_test import pantilt_test, camera_test
 
 
 @click.group()
@@ -75,6 +76,19 @@ def track(label, loglevel):
     logging.getLogger().setLevel(level)
     logging.warning(f'Tracking {label}!')
     return pantilt_process_manager(labels=(label,))
+
+
+@cli.group()
+def test():
+    pass
+
+
+@test.command()
+@click.option('--loglevel', required=False, type=str, default='INFO')
+def pantilt(loglevel):
+    level = logging.getLevelName(loglevel)
+    logging.getLogger().setLevel(level)
+    return pantilt_test()
 
 
 def main():
