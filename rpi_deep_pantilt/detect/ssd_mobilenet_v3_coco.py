@@ -1,6 +1,7 @@
 # Python
 import logging
 import pathlib
+import os
 
 # lib
 import numpy as np
@@ -19,7 +20,7 @@ class SSDMobileNet_V3_Coco_EdgeTPU_Quant(object):
 
     def __init__(
         self,
-        base_url='https://github.com/leigh-johnson/rpi-deep-pantilt/raw/master/models/',
+        base_url='https://github.com/leigh-johnson/rpi-deep-pantilt/releases/download/v1.0.0/',
         model_name='ssdlite_mobilenet_edgetpu_coco_quant',
         input_shape=(320, 320),
         min_score_thresh=0.50,
@@ -30,20 +31,20 @@ class SSDMobileNet_V3_Coco_EdgeTPU_Quant(object):
         self.model_name = model_name
         self.model_file = model_name + '.tar.gz'
         self.model_url = base_url + self.model_file
-        self.tflite_model_file = self.tflite_model_file
+        self.tflite_model_file = tflite_model_file
 
         self.model_dir = tf.keras.utils.get_file(
             fname=self.model_file,
             origin=self.model_url,
-            extract=True,
+            untar=True,
             cache_subdir='models'
         )
 
         self.min_score_thresh = min_score_thresh
 
-        self.model_path = str(
-            pathlib.Path(self.model_dir)
-        ) + self.tflite_model_file
+        self.model_path = os.path.splitext(
+            os.path.splitext(self.model_dir)[0]
+         )[0] + f'/{self.tflite_model_file}'
 
         self.tflite_interpreter = tf.lite.Interpreter(
             model_path=self.model_path,
@@ -176,7 +177,7 @@ class SSDMobileNet_V3_Small_Coco_PostProcessed(object):
 
     def __init__(
         self,
-        base_url='https://github.com/leigh-johnson/rpi-deep-pantilt/raw/master/models/',
+        base_url='https://github.com/leigh-johnson/rpi-deep-pantilt/releases/download/v1.0.0/',
         model_name='ssd_mobilenet_v3_small_coco_2019_08_14',
         input_shape=(320, 320),
         min_score_thresh=0.6
@@ -192,11 +193,13 @@ class SSDMobileNet_V3_Small_Coco_PostProcessed(object):
         self.model_dir = tf.keras.utils.get_file(
             fname=self.model_name,
             origin=self.model_url,
-            untar=True
+            untar=True,
+            cache_subdir='models'
         )
 
-        self.model_path = str(pathlib.Path(self.model_dir)
-                              ) + '/model_postprocessed.tflite'
+        self.model_path =  os.path.splitext(
+            os.path.splitext(self.model_dir)[0]
+         )[0] + '/model_postprocessed.tflite'
 
         self.tflite_interpreter = tf.lite.Interpreter(
             model_path=self.model_path,

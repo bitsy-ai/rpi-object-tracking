@@ -29,7 +29,6 @@ def run_detect(capture_manager, model):
 
             frame = capture_manager.read()
             prediction = model.predict(frame)
-            # print(prediction)
             overlay = model.create_overlay(
                 frame, prediction)
             capture_manager.overlay_buff = overlay
@@ -50,7 +49,7 @@ def detect(loglevel, edge_tpu):
     logging.getLogger().setLevel(level)
 
     if edge_tpu:
-        model = SSDMobileNet_Coco_EdgeTPU_Quant()
+        model = SSDMobileNet_V3_Coco_EdgeTPU_Quant()
     else:
         model = SSDMobileNet_V3_Small_Coco_PostProcessed()
 
@@ -80,12 +79,7 @@ def list_labels(loglevel):
 def track(label, loglevel, edge_tpu):
     level = logging.getLevelName(loglevel)
     logging.getLogger().setLevel(level)
-    logging.warning(f'Tracking {label}!')
-    if edge_tpu:
-        model = SSDMobileNet_V3_Coco_EdgeTPU_Quant()
-    else:
-        model = SSDMobileNet_V3_Small_Coco_PostProcessed()
-    return pantilt_process_manager(model, labels=(label,))
+    return pantilt_process_manager(edge_tpu=edge_tpu, labels=(label,))
 
 
 @cli.group()
