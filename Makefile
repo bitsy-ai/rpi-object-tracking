@@ -99,3 +99,7 @@ rpi-deps:
 	
 protoc:
 	cd $$(python -c 'from distutils.sysconfig import get_python_lib; print(get_python_lib())') && protoc object_detection/protos/*.proto --python_out=.
+
+edgetpu-image:
+	docker build -t  EdgeTPUConverter -f tools/edgetpu.Dockerfile .
+

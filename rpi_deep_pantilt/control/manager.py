@@ -8,7 +8,7 @@ import sys
 import numpy as np
 
 from rpi_deep_pantilt.detect.camera import PiCameraStream
-from rpi_deep_pantilt.detect.ssd_mobilenet_v3_coco import SSDMobileNet_V3_Small_Coco_PostProcessed
+from rpi_deep_pantilt.detect.ssd_mobilenet_v3_coco import SSDMobileNet_V3_Small_Coco_PostProcessed, SSDMobileNet_V3_Coco_EdgeTPU_Quant
 from rpi_deep_pantilt.control.pid import PIDController
 
 logging.basicConfig()
@@ -39,8 +39,12 @@ def signal_handler(sig, frame):
     sys.exit()
 
 
-def run_detect(center_x, center_y, labels):
-    model = SSDMobileNet_V3_Small_Coco_PostProcessed()
+def run_detect(center_x, center_y, labels, edge_tpu):
+    if edge_tpu:
+        model = SSDMobileNet_V3_Coco_EdgeTPU_Quant()
+    else:
+        model = SSDMobileNet_V3_Small_Coco_PostProcessed()
+
     capture_manager = PiCameraStream(resolution=RESOLUTION)
     capture_manager.start()
     capture_manager.start_overlay()
@@ -126,13 +130,14 @@ def pid_process(output, p, i, d, box_coord, origin_coord, action):
     while True:
         error = origin_coord - box_coord.value
         output.value = p.update(error)
-        logging.info(f'{action} error {error} angle: {output.value}')
+        # logging.info(f'{action} error {error} angle: {output.value}')
 
 # ('person',)
 #('orange', 'apple', 'sports ball')
 
 
 def pantilt_process_manager(
+    edge_tpu=False,
     labels=('person',)
 ):
 
@@ -164,7 +169,7 @@ def pantilt_process_manager(
         tilt_d = manager.Value('f', 0)
 
         detect_processr = Process(target=run_detect,
-                                  args=(center_x, center_y, labels))
+                                  args=(center_x, center_y, labels, edge_tpu))
 
         pan_process = Process(target=pid_process,
                               args=(pan, pan_p, pan_i, pan_d, center_x, CENTER[0], 'pan'))
