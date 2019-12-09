@@ -12,8 +12,6 @@ CHECKPOINT=${MODEL_DIR}/model.ckpt
 curl ${MODEL_URL} -o ${MODEL_DIR}.tar.gz
 cd ${TMP_DIR} && tar -xvf ${MODEL_NAME}.tar.gz
 
-           
-
 cd ${TF_MODELS_DIR}/research && \ 
 ${TF_MODELS_PY} object_detection/export_tflite_ssd_graph.py \
 --pipeline_config_path=${CONFIG_FILE} \
