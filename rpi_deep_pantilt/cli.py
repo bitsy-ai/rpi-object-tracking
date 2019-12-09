@@ -9,7 +9,7 @@ import click
 import numpy as np
 
 from rpi_deep_pantilt.detect.camera import PiCameraStream
-from rpi_deep_pantilt.detect.ssd_mobilenet_v3_coco import SSDMobileNet_V3_Small_Coco_PostProcessed
+from rpi_deep_pantilt.detect.ssd_mobilenet_v3_coco import SSDMobileNet_V3_Small_Coco_PostProcessed, SSDMobileNet_V3_Coco_EdgeTPU_Quant
 from rpi_deep_pantilt.control.manager import pantilt_process_manager
 from rpi_deep_pantilt.control.hardware_test import pantilt_test, camera_test
 
@@ -29,7 +29,7 @@ def run_detect(capture_manager, model):
 
             frame = capture_manager.read()
             prediction = model.predict(frame)
-
+            # print(prediction)
             overlay = model.create_overlay(
                 frame, prediction)
             capture_manager.overlay_buff = overlay
@@ -49,7 +49,11 @@ def detect(loglevel, edge_tpu):
     level = logging.getLevelName(loglevel)
     logging.getLogger().setLevel(level)
 
-    model = SSDMobileNet_V3_Small_Coco_PostProcessed(edge_tpu=edge_tpu)
+    if edge_tpu:
+        model = SSDMobileNet_Coco_EdgeTPU_Quant()
+    else:
+        model = SSDMobileNet_V3_Small_Coco_PostProcessed()
+
     capture_manager = PiCameraStream(resolution=(320, 320))
     capture_manager.start()
     capture_manager.start_overlay()
@@ -72,11 +76,16 @@ def list_labels(loglevel):
 @cli.command()
 @click.option('--label', required=True, type=str, default='person', help='The class label to track, e.g `orange`. Run `rpi-deep-pantilt list-labels` to inspect all valid values')
 @click.option('--loglevel', required=False, type=str, default='WARNING')
-def track(label, loglevel):
+@click.option('--edge-tpu', is_flag=True, required=False, type=bool, default=False, help='Accelerate inferences using Coral USB Edge TPU')
+def track(label, loglevel, edge_tpu):
     level = logging.getLevelName(loglevel)
     logging.getLogger().setLevel(level)
     logging.warning(f'Tracking {label}!')
-    return pantilt_process_manager(labels=(label,))
+    if edge_tpu:
+        model = SSDMobileNet_V3_Coco_EdgeTPU_Quant()
+    else:
+        model = SSDMobileNet_V3_Small_Coco_PostProcessed()
+    return pantilt_process_manager(model, labels=(label,))
 
 
 @cli.group()
