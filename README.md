@@ -35,13 +35,21 @@ Before you get started, you should have an up-to-date installation of Raspbian 1
 
 1. Install system dependencies
 
-```
+```bash
 sudo apt-get update && sudo apt-get install -y \
     cmake python3-dev libjpeg-dev libatlas-base-dev raspi-gpio libhdf5-dev python3-smbus
 ```
 
-2. Install the `rpi-deep-pantilt` package.
+2. Install TensorFlow 2.0 (community-built wheel)
+
+```bash
+pip install https://github.com/leigh-johnson/Tensorflow-bin/blob/master/tensorflow-2.0.0-cp37-cp37m-linux_armv7l.whl?raw=true
+
 ```
+
+3. Install the `rpi-deep-pantilt` package.
+
+```bash
 pip install rpi-deep-pantilt
 ```
 
