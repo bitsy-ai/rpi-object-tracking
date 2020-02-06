@@ -1,4 +1,4 @@
-* Raspberry Pi Deep PanTilt version:
+* rpi-deep-pantilt version:
 * Python version:
 * TensorFlow version:
 * Operating System:
