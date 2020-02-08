@@ -39,11 +39,9 @@ def signal_handler(sig, frame):
     sys.exit()
 
 
-def run_detect(center_x, center_y, labels, edge_tpu):
-    if edge_tpu:
-        model = SSDMobileNet_V3_Coco_EdgeTPU_Quant()
-    else:
-        model = SSDMobileNet_V3_Small_Coco_PostProcessed()
+def run_detect(center_x, center_y, labels, model_cls):
+    
+    model = model_cls()
 
     capture_manager = PiCameraStream(resolution=RESOLUTION)
     capture_manager.start()
@@ -137,7 +135,7 @@ def pid_process(output, p, i, d, box_coord, origin_coord, action):
 
 
 def pantilt_process_manager(
-    edge_tpu=False,
+    model_cls,
     labels=('person',)
 ):
 
@@ -169,7 +167,7 @@ def pantilt_process_manager(
         tilt_d = manager.Value('f', 0)
 
         detect_processr = Process(target=run_detect,
-                                  args=(center_x, center_y, labels, edge_tpu))
+                                  args=(center_x, center_y, labels, model_cls))
 
         pan_process = Process(target=pid_process,
                               args=(pan, pan_p, pan_i, pan_d, center_x, CENTER[0], 'pan'))
