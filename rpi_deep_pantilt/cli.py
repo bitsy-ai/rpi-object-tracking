@@ -5,11 +5,17 @@ import logging
 import sys
 import time
 import click
-
 import numpy as np
 
 from rpi_deep_pantilt.detect.camera import PiCameraStream
-from rpi_deep_pantilt.detect.ssd_mobilenet_v3_coco import SSDMobileNet_V3_Small_Coco_PostProcessed, SSDMobileNet_V3_Coco_EdgeTPU_Quant
+from rpi_deep_pantilt.detect.ssd_mobilenet_v3_coco import (
+    SSDMobileNet_V3_Small_Coco_PostProcessed, 
+    SSDMobileNet_V3_Coco_EdgeTPU_Quant
+)
+from rpi_deep_pantilt.detect.facessd_mobilenet_v2 import (
+    FaceSSD_MobileNet_V2,
+    FaceSSD_MobileNet_V2_EdgeTPU
+)
 from rpi_deep_pantilt.control.manager import pantilt_process_manager
 from rpi_deep_pantilt.control.hardware_test import pantilt_test, camera_test
 
@@ -52,6 +58,28 @@ def detect(loglevel, edge_tpu):
         model = SSDMobileNet_V3_Coco_EdgeTPU_Quant()
     else:
         model = SSDMobileNet_V3_Small_Coco_PostProcessed()
+
+    capture_manager = PiCameraStream(resolution=(320, 320))
+    capture_manager.start()
+    capture_manager.start_overlay()
+    try:
+        run_detect(capture_manager, model)
+    except KeyboardInterrupt:
+        capture_manager.stop()
+
+@cli.command()
+@click.option('--loglevel', required=False, type=str, default='WARNING', help='Run object detection without pan-tilt controls. Pass --loglevel=DEBUG to inspect FPS.')
+@click.option('--edge-tpu', is_flag=True, required=False, type=bool, default=False, help='Accelerate inferences using Coral USB Edge TPU')
+def face_detect(loglevel, edge_tpu):
+    level = logging.getLevelName(loglevel)
+    logging.getLogger().setLevel(level)
+
+    if edge_tpu:
+        # 
+        # model = SSDMobileNet_V3_Coco_EdgeTPU_Quant()
+        pass
+    else:
+        model = FaceSSD_MobileNet_V2()
 
     capture_manager = PiCameraStream(resolution=(320, 320))
     capture_manager.start()
