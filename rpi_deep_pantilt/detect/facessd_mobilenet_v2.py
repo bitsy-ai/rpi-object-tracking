@@ -17,12 +17,12 @@ from rpi_deep_pantilt.detect.util.visualization import visualize_boxes_and_label
 class FaceSSD_MobileNet_V2_EdgeTPU(object):
 
     EDGETPU_SHARED_LIB = 'libedgetpu.so.1'
-    PATH_TO_LABELS = rpi_deep_pantilt_path[0] + '/data/mscoco_label_map.pbtxt'
+    PATH_TO_LABELS = rpi_deep_pantilt_path[0] + '/data/facessd_label_map.pbtxt'
 
     def __init__(
         self,
         base_url='https://github.com/leigh-johnson/rpi-deep-pantilt/releases/download/v1.1.0/',
-        model_name='facessd_mobilenet_v2_quantized_320x320_open_image_v4',
+        model_name='facessd_mobilenet_v2_quantized_320x320_open_image_v4_tflite2',
         input_shape=(320, 320),
         min_score_thresh=0.50,
         tflite_model_file='model_postprocessed_quantized_128_uint8_edgetpu.tflite'
@@ -173,12 +173,12 @@ class FaceSSD_MobileNet_V2_EdgeTPU(object):
 
 class FaceSSD_MobileNet_V2(object):
 
-    PATH_TO_LABELS = rpi_deep_pantilt_path[0] + '/data/mscoco_label_map.pbtxt'
+    PATH_TO_LABELS = rpi_deep_pantilt_path[0] + '/data/facessd_label_map.pbtxt'
 
     def __init__(
         self,
-        base_url='https://github.com/leigh-johnson/rpi-deep-pantilt/releases/download/v1.1.0/',
-        model_name='ssd_mobilenet_v3_small_coco_2019_08_14',
+        base_url='https://github.com/leigh-johnson/rpi-deep-pantilt/releases/download/v1.0.1/',
+        model_name='facessd_mobilenet_v2_quantized_320x320_open_image_v4_tflite2',
         input_shape=(320, 320),
         min_score_thresh=0.6
 
