@@ -21,7 +21,7 @@ class FaceSSD_MobileNet_V2_EdgeTPU(object):
 
     def __init__(
         self,
-        base_url='https://github.com/leigh-johnson/rpi-deep-pantilt/releases/download/v1.1.0/',
+        base_url='https://github.com/leigh-johnson/rpi-deep-pantilt/releases/download/v1.0.1/',
         model_name='facessd_mobilenet_v2_quantized_320x320_open_image_v4_tflite2',
         input_shape=(320, 320),
         min_score_thresh=0.50,

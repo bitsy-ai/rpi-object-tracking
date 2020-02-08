@@ -75,8 +75,7 @@ def face_detect(loglevel, edge_tpu):
     logging.getLogger().setLevel(level)
 
     if edge_tpu:
-        # 
-        # model = SSDMobileNet_V3_Coco_EdgeTPU_Quant()
+        model =  FaceSSD_MobileNet_V2_EdgeTPU()
         pass
     else:
         model = FaceSSD_MobileNet_V2()
