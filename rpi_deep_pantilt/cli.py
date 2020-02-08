@@ -109,15 +109,14 @@ def track(label, loglevel, edge_tpu):
     if edge_tpu:
         model_cls =  SSDMobileNet_V3_Coco_EdgeTPU_Quant
     else:
-        model_clas = SSDMobileNet_V3_Small_Coco_PostProcessed
+        model_cls = SSDMobileNet_V3_Small_Coco_PostProcessed
 
     return pantilt_process_manager(model_cls, labels=(label,))
 
 @cli.command()
-@click.option('--label', required=True, type=str, default='face', help='The class label to track, e.g `orange`. Run `rpi-deep-pantilt list-labels` to inspect all valid values')
 @click.option('--loglevel', required=False, type=str, default='WARNING')
 @click.option('--edge-tpu', is_flag=True, required=False, type=bool, default=False, help='Accelerate inferences using Coral USB Edge TPU')
-def face_track(label, loglevel, edge_tpu):
+def face_track(loglevel, edge_tpu):
     level = logging.getLevelName(loglevel)
     logging.getLogger().setLevel(level)
 
@@ -126,7 +125,7 @@ def face_track(label, loglevel, edge_tpu):
     else:
         model_cls = FaceSSD_MobileNet_V2
 
-    return pantilt_process_manager(model_cls, labels=(label,))
+    return pantilt_process_manager(model_cls, labels=('face',))
 
 
 @cli.group()
