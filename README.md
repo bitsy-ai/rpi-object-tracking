@@ -7,6 +7,10 @@
 [![Documentation
 Status](https://readthedocs.org/projects/rpi-deep-pantilt/badge/?version=latest)](https://rpi-deep-pantilt.readthedocs.io/en/latest/?badge=latest)
 
+# READ THIS FIRST!
+
+A detailed walk-through is available in [Real-time Object Tracking with TensorFlow, Raspberry Pi, and Pan-tilt HAT](https://medium.com/@grepLeigh/real-time-object-tracking-with-tensorflow-raspberry-pi-and-pan-tilt-hat-2aeaef47e134).
+
 # Build List
 
   - [Raspberry Pi 4 (4GB recommended)](https://www.raspberrypi.org/products/raspberry-pi-4-model-b/)
