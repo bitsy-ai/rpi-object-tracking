@@ -1,1 +1,1 @@
-docker run -v `pwd`:/workspace EdgeTPUConverter edgetpu_compiler /workspace/models/$1
+docker run -v `pwd`:/workspace edge_tpu_converter edgetpu_compiler /workspace/models/$1
