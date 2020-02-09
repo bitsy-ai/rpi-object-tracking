@@ -132,8 +132,8 @@ Options:
 The following command will track between all faces in a frame. Supports Edge TPU acceleration by passing the `--edge-tpu` option.
 
 ```
-rpi-deep-pantilt face-detect --help
-Usage: cli.py face-detect [OPTIONS]
+rpi-deep-pantilt face-track --help
+Usage: cli.py face-track [OPTIONS]
 
 Options:
   --loglevel TEXT  Run object detection without pan-tilt controls. Pass
