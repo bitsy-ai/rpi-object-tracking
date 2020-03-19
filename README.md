@@ -57,6 +57,26 @@ pip install https://github.com/leigh-johnson/Tensorflow-bin/blob/master/tensorfl
 pip install rpi-deep-pantilt
 ```
 
+4. Raspberry 4 users running Rasberian Buster might have to edit /boot/config.txt and uncomment the following lines
+
+```bash
+dtparam=i2c1=on
+dtparam=i2c_arm=on
+```
+if they see an error running 
+
+```bash
+$ rpi-deep-pantilt test pantilt
+```
+similar to :
+
+```bash
+  File "/home/pi/projects/rpi-deep-pantilt/.venv/lib/python3.7/site-packages/pantilthat/pantilt.py", line 72, in setup
+    self._i2c = SMBus(1)
+FileNotFoundError: [Errno 2] No such file or directory
+```
+Source: https://github.com/ankitaggarwal011/PiScope/issues/3#issuecomment-166381762
+
 # Example Usage
 
 ## Object Detection
