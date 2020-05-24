@@ -22,10 +22,10 @@ common_requirements = [
     'Click>=7.0',
     'pillow',
     'h5py',
-    'tensorflow>=2.2.0'
 ]
 
 trainer_requirements = [
+    'tensorflow==2.0.0',
     'numpy'
 ]
 
