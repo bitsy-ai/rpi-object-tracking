@@ -40,43 +40,68 @@ Before you get started, you should have an up-to-date installation of Raspbian 1
 1. Install system dependencies
 
 ```bash
-sudo apt-get update && sudo apt-get install -y \
+$ sudo apt-get update && sudo apt-get install -y \
     cmake python3-dev libjpeg-dev libatlas-base-dev raspi-gpio libhdf5-dev python3-smbus
 ```
 
-2. Install TensorFlow 2.0 (community-built wheel)
+1. Create new virtual environment
 
 ```bash
-pip install https://github.com/leigh-johnson/Tensorflow-bin/blob/master/tensorflow-2.0.0-cp37-cp37m-linux_armv7l.whl?raw=true
+$ python3 -m venv .venv
+```
+
+3. Activate virtual environment
+
+```bash
+$ source .venv/bin/activate
+```
+
+4. Upgrade setuptools
+
+```bash
+$ pip install --upgrade setuptools
+```
+
+5. Install TensorFlow 2.2 (community-built wheel)
+
+```bash
+$ pip install https://github.com/leigh-johnson/Tensorflow-bin/releases/download/v2.2.0/tensorflow-2.2.0-cp37-cp37m-linux_armv7l.whl
 
 ```
 
-3. Install the `rpi-deep-pantilt` package.
+6. Install the `rpi-deep-pantilt` package.
 
 ```bash
 pip install rpi-deep-pantilt
 ```
 
-4. Raspberry 4 users running Rasberian Buster might have to edit /boot/config.txt and uncomment the following lines
+=======
+# Configuration
+
+WARNING: Do not skip this section! You will not be able to use `rpi-deep-pantilt` without properly configuring your Pi.
+
+### Enable Pi Camera
+
+1. Run `sudo raspi-config` and select `Interfacing Options` from the Raspberry Pi Software Configuration Tool’s main menu. Press ENTER.
+
+![raspi-config main menu](/images/camera1.png)
+
+2. Select the Enable Camera menu option and press ENTER.
+
+![raspi-config interfacing options menu](/images/camera2.png)
+
+3. In the next menu, use the right arrow key to highlight ENABLE and press ENTER.
+
+![raspi-config enable camera yes/no menu](/images/camera3.png)
+
+### Enable i2c in Device Tree
+
+1. Open `/boot/config.txt` and verify the following `dtparams` lines are uncommented:
 
 ```bash
 dtparam=i2c1=on
 dtparam=i2c_arm=on
 ```
-if they see an error running 
-
-```bash
-$ rpi-deep-pantilt test pantilt
-```
-similar to :
-
-```bash
-  File "/home/pi/projects/rpi-deep-pantilt/.venv/lib/python3.7/site-packages/pantilthat/pantilt.py", line 72, in setup
-    self._i2c = SMBus(1)
-FileNotFoundError: [Errno 2] No such file or directory
-```
-Source: https://github.com/ankitaggarwal011/PiScope/issues/3#issuecomment-166381762
-
 # Example Usage
 
 ## Object Detection
@@ -193,6 +218,25 @@ I was able to use the same model architechture for FLOAT32 and UINT8 input, `fac
 
 This model is derived from `facessd_mobilenet_v2_quantized_320x320_open_image_v4` in [tensorflow/models](https://github.com/tensorflow/models). 
 
+# Common Issues
+
+### i2c is not enabled
+
+If you run `$ rpi-deep-pantilt test pantilt` and see a similar error, check your Device Tree configuration.
+
+```python
+File "/home/pi/projects/rpi-deep-pantilt/.venv/lib/python3.7/site-packages/pantilthat/pantilt.py", line 72, in setup
+self._i2c = SMBus(1)
+FileNotFoundError: [Errno 2] No such file or directory
+```
+
+Open `/boot/config.txt` and ensure the following lines are uncommented:
+
+```bash
+dtparam=i2c1=on
+dtparam=i2c_arm=on
+```
+
 # Credits
 
 The MobileNetV3-SSD model in this package was derived from [TensorFlow's model zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md), with [post-processing ops added](https://gist.github.com/leigh-johnson/155264e343402c761c03bc0640074d8c).
@@ -203,3 +247,4 @@ This package was created with
 [Cookiecutter](https://github.com/audreyr/cookiecutter) and the
 [audreyr/cookiecutter-pypackage](https://github.com/audreyr/cookiecutter-pypackage)
 project template.
+
