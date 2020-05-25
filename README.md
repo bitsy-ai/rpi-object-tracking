@@ -114,27 +114,43 @@ dtparam=i2c_arm=on
 
 ## Object Detection
 
-The following will start a PiCamera preview and render detected objects as an overlay. Verify you're able to detect an object before trying to track it. 
+The `detect` command will start a PiCamera preview and render detected objects as an overlay. Verify you're able to detect an object before trying to track it. 
 
 Supports Edge TPU acceleration by passing the `--edge-tpu` option.
 
-`rpi-deep-pantilt detect`
+`rpi-deep-pantilt detect [OPTIONS] [LABELS]...`
 
 ```
 rpi-deep-pantilt detect --help
+Usage: rpi-deep-pantilt detect [OPTIONS] [LABELS]...
 
-Usage: rpi-deep-pantilt detect [OPTIONS]
+  rpi-deep-pantilt detect [OPTIONS] [LABELS]
+
+    LABELS (optional)     One or more labels to detect, for example:     
+    $ rpi-deep-pantilt detect person book "wine glass"
+
+    If no labels are specified, model will detect all labels in this list:
+    $ rpi-deep-pantilt list-labels
+
+    Detect command will automatically load the appropriate model
+
+    For example, providing "face" as the only label will initalize
+    FaceSSD_MobileNet_V2 model $ rpi-deep-pantilt detect face
+
+    Other labels use SSDMobileNetV3 with COCO labels $ rpi-deep-pantilt detect
+    person "wine class" orange
 
 Options:
   --loglevel TEXT  Run object detection without pan-tilt controls. Pass
                    --loglevel=DEBUG to inspect FPS.
   --edge-tpu       Accelerate inferences using Coral USB Edge TPU
   --help           Show this message and exit.
+
 ```
 
 ## Object Tracking
 
-The following will start a PiCamera preview, render detected objects as an overlay, and track an object's movement with the pan-tilt HAT. 
+The following will start a PiCamera preview, render detected objects as an overlay, and track an object's movement with Pimoroni pan-tilt HAT. 
 
 By default, this will track any `person` in the frame. You can track other objects by passing `--label <label>`. For a list of valid labels, run `rpi-deep-pantilt list-labels`. 
 
@@ -143,14 +159,24 @@ By default, this will track any `person` in the frame. You can track other objec
 Supports Edge TPU acceleration by passing the `--edge-tpu` option.
 
 ```
-rpi-deep-pantilt track --help 
-Usage: cli.py track [OPTIONS]
+Usage: rpi-deep-pantilt track [OPTIONS] [LABEL]
+
+  rpi-deep-pantilt track [OPTIONS] [LABEL]
+
+  LABEL (required, default: person) Exactly one label to detect, for example:     
+  $ rpi-deep-pantilt track person
+
+  Track command will automatically load the appropriate model
+
+  For example, providing "face" will initalize FaceSSD_MobileNet_V2 model
+  $ rpi-deep-pantilt track face
+
+  Other labels use SSDMobileNetV3 model with COCO labels 
+  $ rpi-deep-pantilt detect orange
 
 Options:
-  --label TEXT     The class label to track, e.g `orange`. Run `rpi-deep-
-                   pantilt list-labels` to inspect all valid values
-                   [required]
-  --loglevel TEXT
+  --loglevel TEXT  Pass --loglevel=DEBUG to inspect FPS and tracking centroid
+                   X/Y coordinates
   --edge-tpu       Accelerate inferences using Coral USB Edge TPU
   --help           Show this message and exit.
 ```
@@ -167,10 +193,14 @@ The following labels are valid tracking targets.
 
 ## Face Detection (NEW in v1.1.x)
 
-The following command will detect all faces. Supports Edge TPU acceleration by passing the `--edge-tpu` option.
+The following command will detect human faces. 
+
+NOTE: Face detection uses a specialized model (FaceSSD_MobileNet_V2), while other labels are detecting using SSDMobileNetV3_COCO. You cannot detect both face and COCO labels at this time. 
+
+Watch this repo for updates that allow you to re-train these models to support a custom mix of object labels!
 
 ```
-rpi-deep-pantilt face-detect --help
+rpi-deep-pantilt detect face
 Usage: cli.py face-detect [OPTIONS]
 
 Options:
@@ -182,11 +212,11 @@ Options:
 
 ## Face Tracking (NEW in v1.1.x)
 
-The following command will track between all faces in a frame. Supports Edge TPU acceleration by passing the `--edge-tpu` option.
+The following command will track a human face. 
 
 ```
-rpi-deep-pantilt face-track --help
-Usage: cli.py face-track [OPTIONS]
+rpi-deep-pantilt track face
+Usage: cli.py face-detect [OPTIONS]
 
 Options:
   --loglevel TEXT  Run object detection without pan-tilt controls. Pass
