@@ -10,8 +10,6 @@ from picamera import PiCamera
 
 
 def camera_test():
-    pantilthat.pan(0)
-    pantilthat.tilt(0)
     camera = PiCamera()
     logging.info('Starting Raspberry Pi Camera')
     camera.start_preview()
