@@ -95,6 +95,20 @@ class SSDMobileNet_V3_Coco_EdgeTPU_Quant(object):
     def label_display_name_by_idx(self, idx):
         return self.category_index[idx]['display_name']
 
+    def filter_tracked(self, prediction, label_idxs):
+        '''
+            Zero predictions not in list of label_idxs
+        '''
+        return {
+            'detection_boxes': prediction.get('detection_boxes'),
+            'detection_classes': prediction.get('detection_classes'),
+            'detection_scores':
+                np.array(
+                    [v if prediction.get('detection_classes')[i] in label_idxs
+                     else 0.0
+                     for i, v in enumerate(prediction.get('detection_scores'))])
+        }
+
     def create_overlay(self, image_np, output_dict):
 
         image_np = image_np.copy()
@@ -245,6 +259,20 @@ class SSDMobileNet_V3_Small_Coco_PostProcessed(object):
 
     def label_display_name_by_idx(self, idx):
         return self.category_index[idx]['display_name']
+
+    def filter_tracked(self, prediction, label_idxs):
+        '''
+            Zero predictions not in list of label_idxs
+        '''
+        return {
+            'detection_boxes': prediction.get('detection_boxes'),
+            'detection_classes': prediction.get('detection_classes'),
+            'detection_scores':
+                np.array(
+                    [v if prediction.get('detection_classes')[i] in label_idxs
+                     else 0.0
+                     for i, v in enumerate(prediction.get('detection_scores'))])
+        }
 
     def create_overlay(self, image_np, output_dict):
 

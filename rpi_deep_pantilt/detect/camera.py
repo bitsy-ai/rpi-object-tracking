@@ -87,22 +87,29 @@ def run_stationary_detect(labels, model_cls):
     start_time = time.time()
     fps_counter = 0
 
-    while not capture_manager.stopped:
-        if capture_manager.frame is not None:
-            frame = capture_manager.read()
-            prediction = model.predict(frame)
+    try:
+        while not capture_manager.stopped:
+            if capture_manager.frame is not None:
+                frame = capture_manager.read()
+                prediction = model.predict(frame)
 
-            if not len(prediction.get('detection_boxes')):
-                continue
-            if any(item in label_idxs for item in prediction.get('detection_classes')):
-                overlay = model.create_overlay(frame, prediction)
-                capture_manager.overlay_buff = overlay
-            if LOGLEVEL is logging.DEBUG and (time.time() - start_time) > 1:
-                fps_counter += 1
-                fps = fps_counter / (time.time() - start_time)
-                logging.debug(f'FPS: {fps}')
-                fps_counter = 0
-                start_time = time.time()
+                if not len(prediction.get('detection_boxes')):
+                    continue
+                if any(item in label_idxs for item in prediction.get('detection_classes')):
+                    filtered_prediction = model.filter_tracked(
+                        prediction, label_idxs)
+
+                    overlay = model.create_overlay(frame, filtered_prediction)
+                    capture_manager.overlay_buff = overlay
+
+                if LOGLEVEL is logging.DEBUG and (time.time() - start_time) > 1:
+                    fps_counter += 1
+                    fps = fps_counter / (time.time() - start_time)
+                    logging.debug(f'FPS: {fps}')
+                    fps_counter = 0
+                    start_time = time.time()
+    except KeyboardInterrupt:
+        capture_manager.stop()
 
 
 def _monkey_patch_picamera(overlay):
