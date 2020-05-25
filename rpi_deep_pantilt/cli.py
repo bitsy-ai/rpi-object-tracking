@@ -44,6 +44,14 @@ def detect(labels, loglevel, edge_tpu):
 
             If no labels are specified, model will detect all labels in this list:
             $ rpi-deep-pantilt list-labels
+
+        Detect command will automatically load the appropriate model
+
+        For example, providing "face" as the only label will initalize FaceSSD_MobileNet_V2 model
+        $ rpi-deep-pantilt detect face
+
+        Other labels use SSDMobileNetV3 with COCO labels
+        $ rpi-deep-pantilt detect person "wine class" orange
     '''
     level = logging.getLevelName(loglevel)
     logging.getLogger().setLevel(level)
@@ -89,28 +97,6 @@ def detect(labels, loglevel, edge_tpu):
 
 
 @cli.command()
-@click.option('--loglevel', required=False, type=str, default='WARNING', help='Run object detection without pan-tilt controls. Pass --loglevel=DEBUG to inspect FPS.')
-@click.option('--edge-tpu', is_flag=True, required=False, type=bool, default=False, help='Accelerate inferences using Coral USB Edge TPU')
-def face_detect(loglevel, edge_tpu):
-    level = logging.getLevelName(loglevel)
-    logging.getLogger().setLevel(level)
-
-    if edge_tpu:
-        model = FaceSSD_MobileNet_V2_EdgeTPU()
-        pass
-    else:
-        model = FaceSSD_MobileNet_V2()
-
-    capture_manager = PiCameraStream(resolution=(320, 320))
-    capture_manager.start()
-    capture_manager.start_overlay()
-    try:
-        run_stationary_detect(capture_manager, model)
-    except KeyboardInterrupt:
-        capture_manager.stop()
-
-
-@cli.command()
 @click.option('--loglevel', required=False, type=str, default='WARNING', help='List all valid classification labels')
 def list_labels(loglevel):
     level = logging.getLevelName(loglevel)
@@ -133,21 +119,6 @@ def track(label, loglevel, edge_tpu):
         model_cls = SSDMobileNet_V3_Small_Coco_PostProcessed
 
     return pantilt_process_manager(model_cls, labels=(label,))
-
-
-@cli.command()
-@click.option('--loglevel', required=False, type=str, default='WARNING')
-@click.option('--edge-tpu', is_flag=True, required=False, type=bool, default=False, help='Accelerate inferences using Coral USB Edge TPU')
-def face_track(loglevel, edge_tpu):
-    level = logging.getLevelName(loglevel)
-    logging.getLogger().setLevel(level)
-
-    if edge_tpu:
-        model_cls = FaceSSD_MobileNet_V2_EdgeTPU
-    else:
-        model_cls = FaceSSD_MobileNet_V2
-
-    return pantilt_process_manager(model_cls, labels=('face',))
 
 
 @cli.group()
