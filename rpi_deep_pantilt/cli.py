@@ -7,14 +7,19 @@ import time
 import click
 import numpy as np
 
-from rpi_deep_pantilt.detect.camera import PiCameraStream
+from rpi_deep_pantilt.detect.camera import (
+    PiCameraStream,
+    run_stationary_detect
+)
 from rpi_deep_pantilt.detect.ssd_mobilenet_v3_coco import (
-    SSDMobileNet_V3_Small_Coco_PostProcessed, 
-    SSDMobileNet_V3_Coco_EdgeTPU_Quant
+    SSDMobileNet_V3_Small_Coco_PostProcessed,
+    SSDMobileNet_V3_Coco_EdgeTPU_Quant,
+    LABELS as SSDMobileNetLabels
 )
 from rpi_deep_pantilt.detect.facessd_mobilenet_v2 import (
     FaceSSD_MobileNet_V2,
-    FaceSSD_MobileNet_V2_EdgeTPU
+    FaceSSD_MobileNet_V2_EdgeTPU,
+    LABELS as FaceSSDLabels
 )
 from rpi_deep_pantilt.control.manager import pantilt_process_manager
 from rpi_deep_pantilt.control.hardware_test import pantilt_test, camera_test
@@ -25,47 +30,51 @@ def cli():
     pass
 
 
-def run_detect(capture_manager, model):
-    LOGLEVEL = logging.getLogger().getEffectiveLevel()
-
-    start_time = time.time()
-    fps_counter = 0
-    while not capture_manager.stopped:
-        if capture_manager.frame is not None:
-
-            frame = capture_manager.read()
-            prediction = model.predict(frame)
-            overlay = model.create_overlay(
-                frame, prediction)
-            capture_manager.overlay_buff = overlay
-            if LOGLEVEL <= logging.INFO:
-                fps_counter += 1
-                if (time.time() - start_time) > 1:
-                    fps = fps_counter / (time.time() - start_time)
-                    logging.info(f'FPS: {fps}')
-                    fps_counter = 0
-                    start_time = time.time()
-
-
 @cli.command()
+@click.argument('labels', nargs=-1, default=SSDMobileNetLabels, help='One or more labels to detect (optional). If no labels are specified, detect all included COCO classes. Run `rpi-deep-pantilt list-labels` for a full list.')
 @click.option('--loglevel', required=False, type=str, default='WARNING', help='Run object detection without pan-tilt controls. Pass --loglevel=DEBUG to inspect FPS.')
 @click.option('--edge-tpu', is_flag=True, required=False, type=bool, default=False, help='Accelerate inferences using Coral USB Edge TPU')
-def detect(loglevel, edge_tpu):
+def detect(labels, loglevel, edge_tpu):
     level = logging.getLevelName(loglevel)
     logging.getLogger().setLevel(level)
 
-    if edge_tpu:
-        model = SSDMobileNet_V3_Coco_EdgeTPU_Quant()
+    for label in labels:
+        if label not in SSDMobileNetLabels + FaceSSDLabels:
+            logging.error(f'''
+            Invalid label: {label} \n
+            Please choose any of the following labels: \n
+            {SSDMobileNetLabels + FaceSSDLabels}
+            ''')
+            sys.exit(1)
+
+    if 'face' in labels and len(labels) > 1:
+        logging.error(
+            f'''Face detector does not support detection for non-face labels \n
+               Please re-run with face as the only label argument: \n 
+               $ rpi-deep-pantilt detect face
+            '''
+        )
+
+    if 'face' in labels:
+        if edge_tpu:
+            model = FaceSSD_MobileNet_V2_EdgeTPU()
+            pass
+        else:
+            model = FaceSSD_MobileNet_V2()
     else:
-        model = SSDMobileNet_V3_Small_Coco_PostProcessed()
+        if edge_tpu:
+            model = SSDMobileNet_V3_Coco_EdgeTPU_Quant()
+        else:
+            model = SSDMobileNet_V3_Small_Coco_PostProcessed()
 
     capture_manager = PiCameraStream(resolution=(320, 320))
     capture_manager.start()
     capture_manager.start_overlay()
     try:
-        run_detect(capture_manager, model)
+        run_stationary_detect(capture_manager, model, labels)
     except KeyboardInterrupt:
         capture_manager.stop()
+
 
 @cli.command()
 @click.option('--loglevel', required=False, type=str, default='WARNING', help='Run object detection without pan-tilt controls. Pass --loglevel=DEBUG to inspect FPS.')
@@ -75,7 +84,7 @@ def face_detect(loglevel, edge_tpu):
     logging.getLogger().setLevel(level)
 
     if edge_tpu:
-        model =  FaceSSD_MobileNet_V2_EdgeTPU()
+        model = FaceSSD_MobileNet_V2_EdgeTPU()
         pass
     else:
         model = FaceSSD_MobileNet_V2()
@@ -84,7 +93,7 @@ def face_detect(loglevel, edge_tpu):
     capture_manager.start()
     capture_manager.start_overlay()
     try:
-        run_detect(capture_manager, model)
+        run_stationary_detect(capture_manager, model)
     except KeyboardInterrupt:
         capture_manager.stop()
 
@@ -107,11 +116,12 @@ def track(label, loglevel, edge_tpu):
     level = logging.getLevelName(loglevel)
     logging.getLogger().setLevel(level)
     if edge_tpu:
-        model_cls =  SSDMobileNet_V3_Coco_EdgeTPU_Quant
+        model_cls = SSDMobileNet_V3_Coco_EdgeTPU_Quant
     else:
         model_cls = SSDMobileNet_V3_Small_Coco_PostProcessed
 
     return pantilt_process_manager(model_cls, labels=(label,))
+
 
 @cli.command()
 @click.option('--loglevel', required=False, type=str, default='WARNING')
