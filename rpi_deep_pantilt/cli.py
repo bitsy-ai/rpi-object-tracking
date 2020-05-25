@@ -25,6 +25,17 @@ from rpi_deep_pantilt.control.manager import pantilt_process_manager
 from rpi_deep_pantilt.control.hardware_test import pantilt_test, camera_test
 
 
+def validate_labels(labels):
+    for label in labels:
+        if label not in (SSDMobileNetLabels + FaceSSDLabels):
+            logging.error(f'''
+            Invalid label: {label} \n
+            Please choose any of the following labels: \n
+            {SSDMobileNetLabels + FaceSSDLabels}
+            ''')
+            sys.exit(1)
+
+
 @click.group()
 def cli():
     pass
@@ -36,7 +47,7 @@ def cli():
 @click.option('--edge-tpu', is_flag=True, required=False, type=bool, default=False, help='Accelerate inferences using Coral USB Edge TPU')
 def detect(labels, loglevel, edge_tpu):
     '''
-        rpi-deep-pantilt detect [OPTIONS] [LABELS]
+        rpi-deep-pantilt detect [OPTIONS] [LABELS]...
 
         LABELS (optional)
             One or more labels to detect, for example:
@@ -50,7 +61,7 @@ def detect(labels, loglevel, edge_tpu):
         For example, providing "face" as the only label will initalize FaceSSD_MobileNet_V2 model
         $ rpi-deep-pantilt detect face
 
-        Other labels use SSDMobileNetV3 with COCO labels
+        Other labels use SSDMobileNetV3 model with COCO labels
         $ rpi-deep-pantilt detect person "wine class" orange
     '''
     level = logging.getLevelName(loglevel)
@@ -61,14 +72,7 @@ def detect(labels, loglevel, edge_tpu):
         labels = SSDMobileNetLabels
     # Sanity-check provided labels are supported by model
     else:
-        for label in labels:
-            if label not in SSDMobileNetLabels + FaceSSDLabels:
-                logging.error(f'''
-                Invalid label: {label} \n
-                Please choose any of the following labels: \n
-                {SSDMobileNetLabels + FaceSSDLabels}
-                ''')
-                sys.exit(1)
+        validate_labels(labels)
 
     if 'face' in labels and len(labels) > 1:
         logging.error(
@@ -82,7 +86,6 @@ def detect(labels, loglevel, edge_tpu):
     if 'face' in labels:
         if edge_tpu:
             model_cls = FaceSSD_MobileNet_V2_EdgeTPU
-            pass
         else:
             model_cls = FaceSSD_MobileNet_V2
     # All other labels are detected by SSDMobileNetV3 model
@@ -107,16 +110,40 @@ def list_labels(loglevel):
 
 
 @cli.command()
-@click.option('--label', required=True, type=str, default='person', help='The class label to track, e.g `orange`. Run `rpi-deep-pantilt list-labels` to inspect all valid values')
-@click.option('--loglevel', required=False, type=str, default='WARNING')
+@click.argument('label', type=str, default='person')
+@click.option('--loglevel', required=False, type=str, default='WARNING', help='Pass --loglevel=DEBUG to inspect FPS and tracking centroid X/Y coordinates')
 @click.option('--edge-tpu', is_flag=True, required=False, type=bool, default=False, help='Accelerate inferences using Coral USB Edge TPU')
 def track(label, loglevel, edge_tpu):
+    '''
+        rpi-deep-pantilt track [OPTIONS] [LABEL]
+
+        LABEL (required)
+            Exactly one label to detect, for example:
+            $ rpi-deep-pantilt track person
+
+        Track command will automatically load the appropriate model
+
+        For example, providing "face" will initalize FaceSSD_MobileNet_V2 model
+        $ rpi-deep-pantilt track face
+
+        Other labels use SSDMobileNetV3 model with COCO labels
+        $ rpi-deep-pantilt detect orange
+    '''
     level = logging.getLevelName(loglevel)
     logging.getLogger().setLevel(level)
-    if edge_tpu:
-        model_cls = SSDMobileNet_V3_Coco_EdgeTPU_Quant
+
+    validate_labels((label,))
+
+    if label == 'face':
+        if edge_tpu:
+            model_cls = FaceSSD_MobileNet_V2_EdgeTPU
+        else:
+            model_cls = FaceSSD_MobileNet_V2
     else:
-        model_cls = SSDMobileNet_V3_Small_Coco_PostProcessed
+        if edge_tpu:
+            model_cls = SSDMobileNet_V3_Coco_EdgeTPU_Quant
+        else:
+            model_cls = SSDMobileNet_V3_Small_Coco_PostProcessed
 
     return pantilt_process_manager(model_cls, labels=(label,))
 
