@@ -75,6 +75,14 @@ $ pip install https://github.com/leigh-johnson/Tensorflow-bin/releases/download/
 pip install rpi-deep-pantilt
 ```
 
+7. Install Coral Edge TPU `tflite_runtime` (optional)
+
+NOTE: This step is only required if you are using [Coral's Edge TPU USB Accelerator](https://coral.withgoogle.com/products/accelerator). If you would like to run TFLite inferences using CPU only, skip this step. 
+
+```bash
+$ pip install https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp37-cp37m-linux_armv7l.whl
+```
+
 =======
 # Configuration
 

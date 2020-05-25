@@ -2,6 +2,7 @@
 import logging
 import pathlib
 import os
+import sys
 
 # lib
 import numpy as np
@@ -44,9 +45,18 @@ class SSDMobileNet_V3_Coco_EdgeTPU_Quant(object):
 
         self.model_path = os.path.splitext(
             os.path.splitext(self.model_dir)[0]
-         )[0] + f'/{self.tflite_model_file}'
+        )[0] + f'/{self.tflite_model_file}'
 
-        self.tflite_interpreter = tf.lite.Interpreter(
+        try:
+            from tflite_runtime import interpreter as coral_tflite_interpreter
+        except ImportError as e:
+            logging.error(e)
+            logging.error('Please install Edge TPU tflite_runtime:')
+            logging.error(
+                '$ pip install 	https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp37-cp37m-linux_armv7l.whl')
+            sys.exit(1)
+
+        self.tflite_interpreter = coral_tflite_interpreter.Interpreter(
             model_path=self.model_path,
             experimental_delegates=[
                 tf.lite.experimental.load_delegate(self.EDGETPU_SHARED_LIB)
@@ -197,9 +207,9 @@ class SSDMobileNet_V3_Small_Coco_PostProcessed(object):
             cache_subdir='models'
         )
 
-        self.model_path =  os.path.splitext(
+        self.model_path = os.path.splitext(
             os.path.splitext(self.model_dir)[0]
-         )[0] + '/model_postprocessed.tflite'
+        )[0] + '/model_postprocessed.tflite'
 
         self.tflite_interpreter = tf.lite.Interpreter(
             model_path=self.model_path,
