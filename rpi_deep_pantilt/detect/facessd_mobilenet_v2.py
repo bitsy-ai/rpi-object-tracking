@@ -2,6 +2,7 @@
 import logging
 import pathlib
 import os
+import sys
 
 # lib
 import numpy as np
@@ -12,6 +13,7 @@ from rpi_deep_pantilt import __path__ as rpi_deep_pantilt_path
 from rpi_deep_pantilt.detect.util.label import create_category_index_from_labelmap
 from rpi_deep_pantilt.detect.util.visualization import visualize_boxes_and_labels_on_image_array
 
+LABELS = ['face']
 
 
 class FaceSSD_MobileNet_V2_EdgeTPU(object):
@@ -45,9 +47,18 @@ class FaceSSD_MobileNet_V2_EdgeTPU(object):
 
         self.model_path = os.path.splitext(
             os.path.splitext(self.model_dir)[0]
-         )[0] + f'/{self.tflite_model_file}'
+        )[0] + f'/{self.tflite_model_file}'
 
-        self.tflite_interpreter = tf.lite.Interpreter(
+        try:
+            from tflite_runtime import interpreter as coral_tflite_interpreter
+        except ImportError as e:
+            logging.error(e)
+            logging.error('Please install Edge TPU tflite_runtime:')
+            logging.error(
+                '$ pip install 	https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp37-cp37m-linux_armv7l.whl')
+            sys.exit(1)
+
+        self.tflite_interpreter = coral_tflite_interpreter.Interpreter(
             model_path=self.model_path,
             experimental_delegates=[
                 tf.lite.experimental.load_delegate(self.EDGETPU_SHARED_LIB)
@@ -171,6 +182,7 @@ class FaceSSD_MobileNet_V2_EdgeTPU(object):
             'num_detections': len(num_detections)
         }
 
+
 class FaceSSD_MobileNet_V2(object):
 
     PATH_TO_LABELS = rpi_deep_pantilt_path[0] + '/data/facessd_label_map.pbtxt'
@@ -197,9 +209,9 @@ class FaceSSD_MobileNet_V2(object):
             cache_subdir='models'
         )
 
-        self.model_path =  os.path.splitext(
+        self.model_path = os.path.splitext(
             os.path.splitext(self.model_dir)[0]
-         )[0] + '/model_postprocessed.tflite'
+        )[0] + '/model_postprocessed.tflite'
 
         self.tflite_interpreter = tf.lite.Interpreter(
             model_path=self.model_path,

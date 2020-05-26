@@ -40,48 +40,122 @@ Before you get started, you should have an up-to-date installation of Raspbian 1
 1. Install system dependencies
 
 ```bash
-sudo apt-get update && sudo apt-get install -y \
+$ sudo apt-get update && sudo apt-get install -y \
     cmake python3-dev libjpeg-dev libatlas-base-dev raspi-gpio libhdf5-dev python3-smbus
 ```
 
-2. Install TensorFlow 2.0 (community-built wheel)
+1. Create new virtual environment
 
 ```bash
-pip install https://github.com/leigh-johnson/Tensorflow-bin/blob/master/tensorflow-2.0.0-cp37-cp37m-linux_armv7l.whl?raw=true
+$ python3 -m venv .venv
+```
+
+3. Activate virtual environment
+
+```bash
+$ source .venv/bin/activate
+```
+
+4. Upgrade setuptools
+
+```bash
+$ pip install --upgrade setuptools
+```
+
+5. Install TensorFlow 2.2 (community-built wheel)
+
+```bash
+$ pip install https://github.com/leigh-johnson/Tensorflow-bin/releases/download/v2.2.0/tensorflow-2.2.0-cp37-cp37m-linux_armv7l.whl
 
 ```
 
-3. Install the `rpi-deep-pantilt` package.
+6. Install the `rpi-deep-pantilt` package.
 
 ```bash
 pip install rpi-deep-pantilt
 ```
 
+7. Install Coral Edge TPU `tflite_runtime` (optional)
+
+NOTE: This step is only required if you are using [Coral's Edge TPU USB Accelerator](https://coral.withgoogle.com/products/accelerator). If you would like to run TFLite inferences using CPU only, skip this step. 
+
+```bash
+$ pip install https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp37-cp37m-linux_armv7l.whl
+```
+
+=======
+# Configuration
+
+WARNING: Do not skip this section! You will not be able to use `rpi-deep-pantilt` without properly configuring your Pi.
+
+### Enable Pi Camera
+
+1. Run `sudo raspi-config` and select `Interfacing Options` from the Raspberry Pi Software Configuration Tool’s main menu. Press ENTER.
+
+![raspi-config main menu](/images/camera1.png)
+
+2. Select the Enable Camera menu option and press ENTER.
+
+![raspi-config interfacing options menu](/images/camera2.png)
+
+3. In the next menu, use the right arrow key to highlight ENABLE and press ENTER.
+
+![raspi-config enable camera yes/no menu](/images/camera3.png)
+
+### Enable i2c in Device Tree
+
+1. Open `/boot/config.txt` and verify the following `dtparams` lines are uncommented:
+
+```bash
+dtparam=i2c1=on
+dtparam=i2c_arm=on
+```
 # Example Usage
 
 ## Object Detection
 
-The following will start a PiCamera preview and render detected objects as an overlay. Verify you're able to detect an object before trying to track it. 
+The `detect` command will start a PiCamera preview and render detected objects as an overlay. Verify you're able to detect an object before trying to track it. 
 
 Supports Edge TPU acceleration by passing the `--edge-tpu` option.
 
-`rpi-deep-pantilt detect`
+`rpi-deep-pantilt detect [OPTIONS] [LABELS]...`
 
 ```
 rpi-deep-pantilt detect --help
+Usage: rpi-deep-pantilt detect [OPTIONS] [LABELS]...
 
-Usage: rpi-deep-pantilt detect [OPTIONS]
+  rpi-deep-pantilt detect [OPTIONS] [LABELS]
+
+    LABELS (optional)     One or more labels to detect, for example:     
+    $ rpi-deep-pantilt detect person book "wine glass"
+
+    If no labels are specified, model will detect all labels in this list:
+    $ rpi-deep-pantilt list-labels
+
+    Detect command will automatically load the appropriate model
+
+    For example, providing "face" as the only label will initalize
+    FaceSSD_MobileNet_V2 model $ rpi-deep-pantilt detect face
+
+    Other labels use SSDMobileNetV3 with COCO labels $ rpi-deep-pantilt detect
+    person "wine class" orange
 
 Options:
   --loglevel TEXT  Run object detection without pan-tilt controls. Pass
                    --loglevel=DEBUG to inspect FPS.
   --edge-tpu       Accelerate inferences using Coral USB Edge TPU
+  --rotation INTEGER  PiCamera rotation. If you followed this guide, a
+                      rotation value of 0 is correct.
+                      https://medium.com/@grepLeigh/real-time-object-tracking-
+                      with-tensorflow-raspberry-pi-and-pan-tilt-
+                      hat-2aeaef47e134
   --help           Show this message and exit.
+
 ```
 
 ## Object Tracking
 
-The following will start a PiCamera preview, render detected objects as an overlay, and track an object's movement with the pan-tilt HAT. 
+The following will start a PiCamera preview, render detected objects as an overlay, and track an object's movement with Pimoroni pan-tilt HAT. 
 
 By default, this will track any `person` in the frame. You can track other objects by passing `--label <label>`. For a list of valid labels, run `rpi-deep-pantilt list-labels`. 
 
@@ -90,15 +164,30 @@ By default, this will track any `person` in the frame. You can track other objec
 Supports Edge TPU acceleration by passing the `--edge-tpu` option.
 
 ```
-rpi-deep-pantilt track --help 
-Usage: cli.py track [OPTIONS]
+Usage: rpi-deep-pantilt track [OPTIONS] [LABEL]
+
+  rpi-deep-pantilt track [OPTIONS] [LABEL]
+
+  LABEL (required, default: person) Exactly one label to detect, for example:     
+  $ rpi-deep-pantilt track person
+
+  Track command will automatically load the appropriate model
+
+  For example, providing "face" will initalize FaceSSD_MobileNet_V2 model
+  $ rpi-deep-pantilt track face
+
+  Other labels use SSDMobileNetV3 model with COCO labels 
+  $ rpi-deep-pantilt detect orange
 
 Options:
-  --label TEXT     The class label to track, e.g `orange`. Run `rpi-deep-
-                   pantilt list-labels` to inspect all valid values
-                   [required]
-  --loglevel TEXT
+  --loglevel TEXT  Pass --loglevel=DEBUG to inspect FPS and tracking centroid
+                   X/Y coordinates
   --edge-tpu       Accelerate inferences using Coral USB Edge TPU
+  --rotation INTEGER  PiCamera rotation. If you followed this guide, a
+                      rotation value of 0 is correct.
+                      https://medium.com/@grepLeigh/real-time-object-tracking-
+                      with-tensorflow-raspberry-pi-and-pan-tilt-
+                      hat-2aeaef47e134
   --help           Show this message and exit.
 ```
 
@@ -114,10 +203,14 @@ The following labels are valid tracking targets.
 
 ## Face Detection (NEW in v1.1.x)
 
-The following command will detect all faces. Supports Edge TPU acceleration by passing the `--edge-tpu` option.
+The following command will detect human faces. 
+
+NOTE: Face detection uses a specialized model (FaceSSD_MobileNet_V2), while other labels are detecting using SSDMobileNetV3_COCO. You cannot detect both face and COCO labels at this time. 
+
+Watch this repo for updates that allow you to re-train these models to support a custom mix of object labels!
 
 ```
-rpi-deep-pantilt face-detect --help
+rpi-deep-pantilt detect face
 Usage: cli.py face-detect [OPTIONS]
 
 Options:
@@ -129,11 +222,11 @@ Options:
 
 ## Face Tracking (NEW in v1.1.x)
 
-The following command will track between all faces in a frame. Supports Edge TPU acceleration by passing the `--edge-tpu` option.
+The following command will track a human face. 
 
 ```
-rpi-deep-pantilt face-track --help
-Usage: cli.py face-track [OPTIONS]
+rpi-deep-pantilt track face
+Usage: cli.py face-detect [OPTIONS]
 
 Options:
   --loglevel TEXT  Run object detection without pan-tilt controls. Pass
@@ -173,6 +266,25 @@ I was able to use the same model architechture for FLOAT32 and UINT8 input, `fac
 
 This model is derived from `facessd_mobilenet_v2_quantized_320x320_open_image_v4` in [tensorflow/models](https://github.com/tensorflow/models). 
 
+# Common Issues
+
+### i2c is not enabled
+
+If you run `$ rpi-deep-pantilt test pantilt` and see a similar error, check your Device Tree configuration.
+
+```python
+File "/home/pi/projects/rpi-deep-pantilt/.venv/lib/python3.7/site-packages/pantilthat/pantilt.py", line 72, in setup
+self._i2c = SMBus(1)
+FileNotFoundError: [Errno 2] No such file or directory
+```
+
+Open `/boot/config.txt` and ensure the following lines are uncommented:
+
+```bash
+dtparam=i2c1=on
+dtparam=i2c_arm=on
+```
+
 # Credits
 
 The MobileNetV3-SSD model in this package was derived from [TensorFlow's model zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md), with [post-processing ops added](https://gist.github.com/leigh-johnson/155264e343402c761c03bc0640074d8c).
@@ -183,3 +295,4 @@ This package was created with
 [Cookiecutter](https://github.com/audreyr/cookiecutter) and the
 [audreyr/cookiecutter-pypackage](https://github.com/audreyr/cookiecutter-pypackage)
 project template.
+

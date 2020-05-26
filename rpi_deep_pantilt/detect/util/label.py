@@ -13,7 +13,6 @@
 # limitations under the License.
 # ==============================================================================
 # Python
-import json
 import logging
 
 # Lib

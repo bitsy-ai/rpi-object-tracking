@@ -2,6 +2,7 @@
 import logging
 import pathlib
 import os
+import sys
 
 # lib
 import numpy as np
@@ -11,6 +12,9 @@ import tensorflow as tf
 from rpi_deep_pantilt import __path__ as rpi_deep_pantilt_path
 from rpi_deep_pantilt.detect.util.label import create_category_index_from_labelmap
 from rpi_deep_pantilt.detect.util.visualization import visualize_boxes_and_labels_on_image_array
+
+LABELS = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket',
+          'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush']
 
 
 class SSDMobileNet_V3_Coco_EdgeTPU_Quant(object):
@@ -44,9 +48,18 @@ class SSDMobileNet_V3_Coco_EdgeTPU_Quant(object):
 
         self.model_path = os.path.splitext(
             os.path.splitext(self.model_dir)[0]
-         )[0] + f'/{self.tflite_model_file}'
+        )[0] + f'/{self.tflite_model_file}'
 
-        self.tflite_interpreter = tf.lite.Interpreter(
+        try:
+            from tflite_runtime import interpreter as coral_tflite_interpreter
+        except ImportError as e:
+            logging.error(e)
+            logging.error('Please install Edge TPU tflite_runtime:')
+            logging.error(
+                '$ pip install 	https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp37-cp37m-linux_armv7l.whl')
+            sys.exit(1)
+
+        self.tflite_interpreter = coral_tflite_interpreter.Interpreter(
             model_path=self.model_path,
             experimental_delegates=[
                 tf.lite.experimental.load_delegate(self.EDGETPU_SHARED_LIB)
@@ -81,6 +94,20 @@ class SSDMobileNet_V3_Coco_EdgeTPU_Quant(object):
 
     def label_display_name_by_idx(self, idx):
         return self.category_index[idx]['display_name']
+
+    def filter_tracked(self, prediction, label_idxs):
+        '''
+            Zero predictions not in list of label_idxs
+        '''
+        return {
+            'detection_boxes': prediction.get('detection_boxes'),
+            'detection_classes': prediction.get('detection_classes'),
+            'detection_scores':
+                np.array(
+                    [v if prediction.get('detection_classes')[i] in label_idxs
+                     else 0.0
+                     for i, v in enumerate(prediction.get('detection_scores'))])
+        }
 
     def create_overlay(self, image_np, output_dict):
 
@@ -197,9 +224,9 @@ class SSDMobileNet_V3_Small_Coco_PostProcessed(object):
             cache_subdir='models'
         )
 
-        self.model_path =  os.path.splitext(
+        self.model_path = os.path.splitext(
             os.path.splitext(self.model_dir)[0]
-         )[0] + '/model_postprocessed.tflite'
+        )[0] + '/model_postprocessed.tflite'
 
         self.tflite_interpreter = tf.lite.Interpreter(
             model_path=self.model_path,
@@ -232,6 +259,20 @@ class SSDMobileNet_V3_Small_Coco_PostProcessed(object):
 
     def label_display_name_by_idx(self, idx):
         return self.category_index[idx]['display_name']
+
+    def filter_tracked(self, prediction, label_idxs):
+        '''
+            Zero predictions not in list of label_idxs
+        '''
+        return {
+            'detection_boxes': prediction.get('detection_boxes'),
+            'detection_classes': prediction.get('detection_classes'),
+            'detection_scores':
+                np.array(
+                    [v if prediction.get('detection_classes')[i] in label_idxs
+                     else 0.0
+                     for i, v in enumerate(prediction.get('detection_scores'))])
+        }
 
     def create_overlay(self, image_np, output_dict):
 

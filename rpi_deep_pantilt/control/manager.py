@@ -1,14 +1,11 @@
 import logging
 from multiprocessing import Value, Process, Manager
-import time
 
 import pantilthat as pth
 import signal
 import sys
-import numpy as np
 
-from rpi_deep_pantilt.detect.camera import PiCameraStream
-from rpi_deep_pantilt.detect.ssd_mobilenet_v3_coco import SSDMobileNet_V3_Small_Coco_PostProcessed, SSDMobileNet_V3_Coco_EdgeTPU_Quant
+from rpi_deep_pantilt.detect.camera import run_pantilt_detect
 from rpi_deep_pantilt.control.pid import PIDController
 
 logging.basicConfig()
@@ -37,58 +34,6 @@ def signal_handler(sig, frame):
 
     # exit
     sys.exit()
-
-
-def run_detect(center_x, center_y, labels, model_cls):
-    
-    model = model_cls()
-
-    capture_manager = PiCameraStream(resolution=RESOLUTION)
-    capture_manager.start()
-    capture_manager.start_overlay()
-
-    label_idxs = model.label_to_category_index(labels)
-    start_time = time.time()
-    fps_counter = 0
-    while not capture_manager.stopped:
-        if capture_manager.frame is not None:
-            frame = capture_manager.read()
-            prediction = model.predict(frame)
-
-            if not len(prediction.get('detection_boxes')):
-                continue
-
-            if any(item in label_idxs for item in prediction.get('detection_classes')):
-
-                tracked = (
-                    (i, x) for i, x in
-                    enumerate(prediction.get('detection_classes'))
-                    if x in label_idxs
-                )
-                tracked_idxs, tracked_classes = zip(*tracked)
-
-                track_target = prediction.get('detection_boxes')[
-                    tracked_idxs[0]]
-                # [ymin, xmin, ymax, xmax]
-                y = int(
-                    RESOLUTION[1] - ((np.take(track_target, [0, 2])).mean() * RESOLUTION[1]))
-                center_y.value = y
-                x = int(
-                    RESOLUTION[0] - ((np.take(track_target, [1, 3])).mean() * RESOLUTION[0]))
-                center_x.value = x
-
-                display_name = model.category_index[tracked_classes[0]]['name']
-                logging.info(
-                    f'Tracking {display_name} center_x {x} center_y {y}')
-
-            overlay = model.create_overlay(frame, prediction)
-            capture_manager.overlay_buff = overlay
-            if LOGLEVEL is logging.DEBUG and (time.time() - start_time) > 1:
-                fps_counter += 1
-                fps = fps_counter / (time.time() - start_time)
-                logging.debug(f'FPS: {fps}')
-                fps_counter = 0
-                start_time = time.time()
 
 
 def in_range(val, start, end):
@@ -136,7 +81,8 @@ def pid_process(output, p, i, d, box_coord, origin_coord, action):
 
 def pantilt_process_manager(
     model_cls,
-    labels=('person',)
+    labels=('person',),
+    rotation=0
 ):
 
     pth.servo_enable(1, True)
@@ -166,8 +112,8 @@ def pantilt_process_manager(
         tilt_i = manager.Value('f', 0.2)
         tilt_d = manager.Value('f', 0)
 
-        detect_processr = Process(target=run_detect,
-                                  args=(center_x, center_y, labels, model_cls))
+        detect_processr = Process(target=run_pantilt_detect,
+                                  args=(center_x, center_y, labels, model_cls, rotation))
 
         pan_process = Process(target=pid_process,
                               args=(pan, pan_p, pan_i, pan_d, center_x, CENTER[0], 'pan'))

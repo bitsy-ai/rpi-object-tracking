@@ -9,10 +9,9 @@ from picamera import PiCamera
 # https://github.com/pimoroni/pantilt-hat/blob/master/examples/smooth.py
 
 
-def camera_test():
-    pantilthat.pan(0)
-    pantilthat.tilt(0)
+def camera_test(rotation):
     camera = PiCamera()
+    camera.rotation = rotation
     logging.info('Starting Raspberry Pi Camera')
     camera.start_preview()
 
