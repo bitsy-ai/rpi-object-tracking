@@ -87,7 +87,8 @@ def pid_process(output, p, i, d, box_coord, origin_coord, action):
 
 def pantilt_process_manager(
     model_cls,
-    labels=('person',)
+    labels=('person',),
+    rotation=0
 ):
 
     pth.servo_enable(1, True)
@@ -118,7 +119,7 @@ def pantilt_process_manager(
         tilt_d = manager.Value('f', 0)
 
         detect_processr = Process(target=run_pantilt_detect,
-                                  args=(center_x, center_y, labels, model_cls))
+                                  args=(center_x, center_y, labels, model_cls, rotation))
 
         pan_process = Process(target=pid_process,
                               args=(pan, pan_p, pan_i, pan_d, center_x, CENTER[0], 'pan'))

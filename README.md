@@ -144,6 +144,11 @@ Options:
   --loglevel TEXT  Run object detection without pan-tilt controls. Pass
                    --loglevel=DEBUG to inspect FPS.
   --edge-tpu       Accelerate inferences using Coral USB Edge TPU
+  --rotation INTEGER  PiCamera rotation. If you followed this guide, a
+                      rotation value of 0 is correct.
+                      https://medium.com/@grepLeigh/real-time-object-tracking-
+                      with-tensorflow-raspberry-pi-and-pan-tilt-
+                      hat-2aeaef47e134
   --help           Show this message and exit.
 
 ```
@@ -178,6 +183,11 @@ Options:
   --loglevel TEXT  Pass --loglevel=DEBUG to inspect FPS and tracking centroid
                    X/Y coordinates
   --edge-tpu       Accelerate inferences using Coral USB Edge TPU
+  --rotation INTEGER  PiCamera rotation. If you followed this guide, a
+                      rotation value of 0 is correct.
+                      https://medium.com/@grepLeigh/real-time-object-tracking-
+                      with-tensorflow-raspberry-pi-and-pan-tilt-
+                      hat-2aeaef47e134
   --help           Show this message and exit.
 ```
 
