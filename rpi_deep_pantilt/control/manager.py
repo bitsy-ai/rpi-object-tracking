@@ -1,17 +1,11 @@
 import logging
 from multiprocessing import Value, Process, Manager
-import time
 
 import pantilthat as pth
 import signal
 import sys
-import numpy as np
 
-from rpi_deep_pantilt.detect.camera import (
-    PiCameraStream,
-    run_pantilt_detect
-)
-from rpi_deep_pantilt.detect.ssd_mobilenet_v3_coco import SSDMobileNet_V3_Small_Coco_PostProcessed, SSDMobileNet_V3_Coco_EdgeTPU_Quant
+from rpi_deep_pantilt.detect.camera import run_pantilt_detect
 from rpi_deep_pantilt.control.pid import PIDController
 
 logging.basicConfig()

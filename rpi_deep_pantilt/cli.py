@@ -3,14 +3,10 @@
 """Console script for rpi_deep_pantilt."""
 import logging
 import sys
-import time
 import click
-import numpy as np
 
-from rpi_deep_pantilt.detect.camera import (
-    PiCameraStream,
-    run_stationary_detect
-)
+from rpi_deep_pantilt.detect.camera import run_stationary_detect
+
 from rpi_deep_pantilt.detect.ssd_mobilenet_v3_coco import (
     SSDMobileNet_V3_Small_Coco_PostProcessed,
     SSDMobileNet_V3_Coco_EdgeTPU_Quant,
