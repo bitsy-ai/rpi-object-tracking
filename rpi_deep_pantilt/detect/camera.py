@@ -18,14 +18,14 @@ logging.basicConfig()
 # https://github.com/dtreskunov/rpi-sensorium/commit/40c6f3646931bf0735c5fe4579fa89947e96aed7
 
 
-def run_pantilt_detect(center_x, center_y, labels, model_cls, resolution=RESOLUTION):
+def run_pantilt_detect(center_x, center_y, labels, model_cls, rotation, resolution=RESOLUTION):
     '''
         Updates center_x and center_y coordinates with centroid of detected class's bounding box
         Overlay is only rendered around the tracked object
     '''
     model = model_cls()
 
-    capture_manager = PiCameraStream(resolution=resolution)
+    capture_manager = PiCameraStream(resolution=resolution, rotation=rotation)
     capture_manager.start()
     capture_manager.start_overlay()
 
@@ -73,13 +73,13 @@ def run_pantilt_detect(center_x, center_y, labels, model_cls, resolution=RESOLUT
                 start_time = time.time()
 
 
-def run_stationary_detect(labels, model_cls):
+def run_stationary_detect(labels, model_cls, rotation):
     '''
         Overlay is rendered around all tracked objects
     '''
     model = model_cls()
 
-    capture_manager = PiCameraStream(resolution=RESOLUTION)
+    capture_manager = PiCameraStream(resolution=RESOLUTION, rotation=rotation)
     capture_manager.start()
     capture_manager.start_overlay()
 

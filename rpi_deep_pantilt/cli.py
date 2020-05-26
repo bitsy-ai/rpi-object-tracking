@@ -45,7 +45,8 @@ def cli():
 @click.argument('labels', nargs=-1)
 @click.option('--loglevel', required=False, type=str, default='WARNING', help='Run object detection without pan-tilt controls. Pass --loglevel=DEBUG to inspect FPS.')
 @click.option('--edge-tpu', is_flag=True, required=False, type=bool, default=False, help='Accelerate inferences using Coral USB Edge TPU')
-def detect(labels, loglevel, edge_tpu):
+@click.option('--rotation', default=0, type=int, help='PiCamera rotation. If you followed this guide, a rotation value of 0 is correct. https://medium.com/@grepLeigh/real-time-object-tracking-with-tensorflow-raspberry-pi-and-pan-tilt-hat-2aeaef47e134')
+def detect(labels, loglevel, edge_tpu, rotation):
     '''
         rpi-deep-pantilt detect [OPTIONS] [LABELS]...
 
@@ -77,7 +78,7 @@ def detect(labels, loglevel, edge_tpu):
     if 'face' in labels and len(labels) > 1:
         logging.error(
             f'''Face detector does not support detection for non-face labels \n
-               Please re-run with face as the only label argument: \n 
+               Please re-run with face as the only label argument: \n
                $ rpi-deep-pantilt detect face
             '''
         )
@@ -96,7 +97,7 @@ def detect(labels, loglevel, edge_tpu):
             model_cls = SSDMobileNet_V3_Small_Coco_PostProcessed
 
     logging.warning(f'Detecting labels: {labels}')
-    run_stationary_detect(labels, model_cls)
+    run_stationary_detect(labels, model_cls, rotation)
 
 
 @cli.command()
@@ -113,7 +114,8 @@ def list_labels(loglevel):
 @click.argument('label', type=str, default='person')
 @click.option('--loglevel', required=False, type=str, default='WARNING', help='Pass --loglevel=DEBUG to inspect FPS and tracking centroid X/Y coordinates')
 @click.option('--edge-tpu', is_flag=True, required=False, type=bool, default=False, help='Accelerate inferences using Coral USB Edge TPU')
-def track(label, loglevel, edge_tpu):
+@click.option('--rotation', default=0, type=int, help='PiCamera rotation. If you followed this guide, a rotation value of 0 is correct. https://medium.com/@grepLeigh/real-time-object-tracking-with-tensorflow-raspberry-pi-and-pan-tilt-hat-2aeaef47e134')
+def track(label, loglevel, edge_tpu, rotation):
     '''
         rpi-deep-pantilt track [OPTIONS] [LABEL]
 
@@ -145,7 +147,7 @@ def track(label, loglevel, edge_tpu):
         else:
             model_cls = SSDMobileNet_V3_Small_Coco_PostProcessed
 
-    return pantilt_process_manager(model_cls, labels=(label,))
+    return pantilt_process_manager(model_cls, labels=(label,),  rotation=rotation)
 
 
 @cli.group()
@@ -163,10 +165,11 @@ def pantilt(loglevel):
 
 @test.command()
 @click.option('--loglevel', required=False, type=str, default='INFO')
-def camera(loglevel):
+@click.option('--rotation', default=0, type=int, help='PiCamera rotation. If you followed this guide, a rotation value of 0 is correct. https://medium.com/@grepLeigh/real-time-object-tracking-with-tensorflow-raspberry-pi-and-pan-tilt-hat-2aeaef47e134')
+def camera(loglevel, rotation):
     level = logging.getLevelName(loglevel)
     logging.getLogger().setLevel(level)
-    return camera_test()
+    return camera_test(rotation)
 
 
 def main():
