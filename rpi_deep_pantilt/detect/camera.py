@@ -96,8 +96,14 @@ def run_stationary_detect(labels, model_cls, rotation):
                 if not len(prediction.get('detection_boxes')):
                     continue
                 if any(item in label_idxs for item in prediction.get('detection_classes')):
-                    filtered_prediction = model.filter_tracked(
+                    
+                    # Not all models will need to implement a filter_tracked() interface
+                    # For example, FaceSSD only allows you to track 1 class (faces) and does not implement this method
+                    try:
+                        filtered_prediction = model.filter_tracked(
                         prediction, label_idxs)
+                    except AttributeError:
+                        filtered_prediction = prediction
 
                     overlay = model.create_overlay(frame, filtered_prediction)
                     capture_manager.overlay_buff = overlay
