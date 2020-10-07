@@ -7,12 +7,12 @@ import click
 
 from rpi_deep_pantilt.detect.camera import run_stationary_detect
 
-from rpi_deep_pantilt.detect.ssd_mobilenet_v3_coco import (
+from rpi_deep_pantilt.detect.v1.ssd_mobilenet_v3_coco import (
     SSDMobileNet_V3_Small_Coco_PostProcessed,
     SSDMobileNet_V3_Coco_EdgeTPU_Quant,
     LABELS as SSDMobileNetLabels
 )
-from rpi_deep_pantilt.detect.facessd_mobilenet_v2 import (
+from rpi_deep_pantilt.detect.v1.facessd_mobilenet_v2 import (
     FaceSSD_MobileNet_V2,
     FaceSSD_MobileNet_V2_EdgeTPU,
     LABELS as FaceSSDLabels
@@ -21,13 +21,15 @@ from rpi_deep_pantilt.control.manager import pantilt_process_manager
 from rpi_deep_pantilt.control.hardware_test import pantilt_test, camera_test
 
 
-def validate_labels(labels):
+def validate_labels(labels, registry_file):
     for label in labels:
         if label not in (SSDMobileNetLabels + FaceSSDLabels):
-            logging.error(f'''
-            Invalid label: {label} \n
-            Please choose any of the following labels: \n
-            {SSDMobileNetLabels + FaceSSDLabels}
+            logging.warning(f'''
+            Label {label} not supported by pre-trained models: \n
+            rpi_deep_pantilt.detect.pretrained.ssd_mobilenet_v3_coco\n
+            rpi_deep_pantilt.detect.pretrained.facessd_mobilenet_v2\n
+
+            Looking for custom models...
             ''')
             sys.exit(1)
 
