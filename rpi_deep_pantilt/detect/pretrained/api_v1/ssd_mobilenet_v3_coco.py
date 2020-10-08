@@ -56,7 +56,7 @@ class SSDMobileNetV3CocoEdgeTPU(object):
             logging.error(e)
             logging.error('Please install Edge TPU tflite_runtime:')
             logging.error(
-                '$ pip install 	https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp37-cp37m-linux_armv7l.whl')
+                '$ pip install https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp37-cp37m-linux_armv7l.whl')
             sys.exit(1)
 
         self.tflite_interpreter = coral_tflite_interpreter.Interpreter(

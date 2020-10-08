@@ -102,6 +102,12 @@ rpi-deps:
 protoc:
 	cd $$(python -c 'from distutils.sysconfig import get_python_lib; print(get_python_lib())') && protoc object_detection/protos/*.proto --python_out=.
 
+edgetpu-deps:
+	echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" | sudo tee /etc/apt/sources.list.d/coral-edgetpu.list
+	curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+	sudo apt-get update
+	sudo apt-get install libedgetpu1-std
+
 edgetpu-image:
 	docker build -t  edge_tpu_converter -f tools/edgetpu.Dockerfile .
 
