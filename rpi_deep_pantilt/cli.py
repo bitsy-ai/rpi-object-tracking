@@ -1,38 +1,26 @@
 # -*- coding: utf-8 -*-
 
 """Console script for rpi_deep_pantilt."""
+import importlib
 import logging
 import sys
 import click
 
 from rpi_deep_pantilt.detect.camera import run_stationary_detect
+from rpi_deep_pantilt.detect.registry import ModelRegistry
+# from rpi_deep_pantilt.detect.v1.ssd_mobilenet_v3_coco import (
+#     SSDMobileNet_V3_Small_Coco_PostProcessed,
+#     SSDMobileNet_V3_Coco_EdgeTPU_Quant,
+#     LABELS as SSDMobileNetLabels
+# )
+# from rpi_deep_pantilt.detect.v1.facessd_mobilenet_v2 import (
+#     FaceSSD_MobileNet_V2,
+#     FaceSSD_MobileNet_V2_EdgeTPU,
+#     LABELS as FaceSSDLabels
+# )
 
-from rpi_deep_pantilt.detect.v1.ssd_mobilenet_v3_coco import (
-    SSDMobileNet_V3_Small_Coco_PostProcessed,
-    SSDMobileNet_V3_Coco_EdgeTPU_Quant,
-    LABELS as SSDMobileNetLabels
-)
-from rpi_deep_pantilt.detect.v1.facessd_mobilenet_v2 import (
-    FaceSSD_MobileNet_V2,
-    FaceSSD_MobileNet_V2_EdgeTPU,
-    LABELS as FaceSSDLabels
-)
 from rpi_deep_pantilt.control.manager import pantilt_process_manager
 from rpi_deep_pantilt.control.hardware_test import pantilt_test, camera_test
-
-
-def validate_labels(labels, registry_file):
-    for label in labels:
-        if label not in (SSDMobileNetLabels + FaceSSDLabels):
-            logging.warning(f'''
-            Label {label} not supported by pre-trained models: \n
-            rpi_deep_pantilt.detect.pretrained.ssd_mobilenet_v3_coco\n
-            rpi_deep_pantilt.detect.pretrained.facessd_mobilenet_v2\n
-
-            Looking for custom models...
-            ''')
-            sys.exit(1)
-
 
 @click.group()
 def cli():
@@ -41,10 +29,12 @@ def cli():
 
 @cli.command()
 @click.argument('labels', nargs=-1)
+@click.option('--api-version', required=False, type=int, default=2, help='API Version to use (default: 2). API v1 is supported for legacy use cases.')
+@click.option('--predictor', required=False, type=str, default=None, help='Path and module name of a custom predictor class inheriting from rpi_deep_pantilt.detect.custom.base_predictors.BasePredictor')
 @click.option('--loglevel', required=False, type=str, default='WARNING', help='Run object detection without pan-tilt controls. Pass --loglevel=DEBUG to inspect FPS.')
 @click.option('--edge-tpu', is_flag=True, required=False, type=bool, default=False, help='Accelerate inferences using Coral USB Edge TPU')
 @click.option('--rotation', default=0, type=int, help='PiCamera rotation. If you followed this guide, a rotation value of 0 is correct. https://medium.com/@grepLeigh/real-time-object-tracking-with-tensorflow-raspberry-pi-and-pan-tilt-hat-2aeaef47e134')
-def detect(labels, loglevel, edge_tpu, rotation):
+def detect(api_version, labels, predictor, loglevel, edge_tpu, rotation):
     '''
         rpi-deep-pantilt detect [OPTIONS] [LABELS]...
 
@@ -66,36 +56,14 @@ def detect(labels, loglevel, edge_tpu, rotation):
     level = logging.getLevelName(loglevel)
     logging.getLogger().setLevel(level)
 
+    if predictor is not None:
+        predictor_cls = importlib.import_module(predictor)
+    else:
     # TypeError: nargs=-1 in combination with a default value is not supported.
-    if not labels:
-        labels = SSDMobileNetLabels
-    # Sanity-check provided labels are supported by model
-    else:
-        validate_labels(labels)
+        model_registry = ModelRegistry(edge_tpu=edge_tpu, api_version=api_version)
+        predictor_cls = model_registry.select_model(labels)
 
-    if 'face' in labels and len(labels) > 1:
-        logging.error(
-            f'''Face detector does not support detection for non-face labels \n
-               Please re-run with face as the only label argument: \n
-               $ rpi-deep-pantilt detect face
-            '''
-        )
-
-    # FaceSSD model
-    if 'face' in labels:
-        if edge_tpu:
-            model_cls = FaceSSD_MobileNet_V2_EdgeTPU
-        else:
-            model_cls = FaceSSD_MobileNet_V2
-    # All other labels are detected by SSDMobileNetV3 model
-    else:
-        if edge_tpu:
-            model_cls = SSDMobileNet_V3_Coco_EdgeTPU_Quant
-        else:
-            model_cls = SSDMobileNet_V3_Small_Coco_PostProcessed
-
-    logging.warning(f'Detecting labels: {labels}')
-    run_stationary_detect(labels, model_cls, rotation)
+    run_stationary_detect(labels, predictor_cls, rotation)
 
 
 @cli.command()

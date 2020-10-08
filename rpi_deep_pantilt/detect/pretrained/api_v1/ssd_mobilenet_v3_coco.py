@@ -10,17 +10,17 @@ from PIL import Image
 import tensorflow as tf
 
 from rpi_deep_pantilt import __path__ as rpi_deep_pantilt_path
+from rpi_deep_pantilt.detect.util.exceptions import InvalidLabelException
 from rpi_deep_pantilt.detect.util.label import create_category_index_from_labelmap
 from rpi_deep_pantilt.detect.util.visualization import visualize_boxes_and_labels_on_image_array
 
-LABELS = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket',
-          'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush']
-
-
-class SSDMobileNet_V3_Coco_EdgeTPU_Quant(object):
+class SSDMobileNetV3CocoEdgeTPU(object):
 
     EDGETPU_SHARED_LIB = 'libedgetpu.so.1'
     PATH_TO_LABELS = rpi_deep_pantilt_path[0] + '/data/mscoco_label_map.pbtxt'
+    LABELS = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket',
+          'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush']
+
 
     def __init__(
         self,
@@ -82,9 +82,12 @@ class SSDMobileNet_V3_Coco_EdgeTPU_Quant(object):
             f'model inputs: {self.input_details} \n {self.input_details}')
         logging.info(
             f'model outputs: {self.output_details} \n {self.output_details}')
+    
+    @classmethod
+    def validate_labels(cls, labels):
+        return all([x in cls.LABELS for x in labels])
 
     def label_to_category_index(self, labels):
-        # @todo :trashfire:
         return tuple(map(
             lambda x: x['id'],
             filter(
@@ -198,7 +201,7 @@ class SSDMobileNet_V3_Coco_EdgeTPU_Quant(object):
         }
 
 
-class SSDMobileNet_V3_Small_Coco_PostProcessed(object):
+class SSDMobileNetV3Float32(object):
 
     PATH_TO_LABELS = rpi_deep_pantilt_path[0] + '/data/mscoco_label_map.pbtxt'
 
@@ -248,6 +251,10 @@ class SSDMobileNet_V3_Small_Coco_PostProcessed(object):
         logging.info(
             f'model outputs: {self.output_details} \n {self.output_details}')
 
+    @classmethod
+    def validate_labels(cls, labels):
+        return all([x in cls.LABELS for x in labels])
+        
     def label_to_category_index(self, labels):
         # @todo :trashfire:
         return tuple(map(

@@ -10,16 +10,17 @@ from PIL import Image
 import tensorflow as tf
 
 from rpi_deep_pantilt import __path__ as rpi_deep_pantilt_path
+from rpi_deep_pantilt.detect.util.exceptions import InvalidLabelException
 from rpi_deep_pantilt.detect.util.label import create_category_index_from_labelmap
 from rpi_deep_pantilt.detect.util.visualization import visualize_boxes_and_labels_on_image_array
 
-LABELS = ['face']
 
-
-class FaceSSD_MobileNet_V2_EdgeTPU(object):
+class FaceSSDMobileNetV2EdgeTPU(object):
 
     EDGETPU_SHARED_LIB = 'libedgetpu.so.1'
     PATH_TO_LABELS = rpi_deep_pantilt_path[0] + '/data/facessd_label_map.pbtxt'
+    LABELS = ['face']
+
 
     def __init__(
         self,
@@ -81,7 +82,10 @@ class FaceSSD_MobileNet_V2_EdgeTPU(object):
             f'model inputs: {self.input_details} \n {self.input_details}')
         logging.info(
             f'model outputs: {self.output_details} \n {self.output_details}')
-
+    @classmethod
+    def validate_labels(cls, labels):
+        return all([x in cls.LABELS for x in labels])
+        
     def label_to_category_index(self, labels):
         # @todo :trashfire:
         return tuple(map(
@@ -183,7 +187,7 @@ class FaceSSD_MobileNet_V2_EdgeTPU(object):
         }
 
 
-class FaceSSD_MobileNet_V2(object):
+class FaceSSDMobileNetV2Float32(object):
 
     PATH_TO_LABELS = rpi_deep_pantilt_path[0] + '/data/facessd_label_map.pbtxt'
 
@@ -232,7 +236,10 @@ class FaceSSD_MobileNet_V2(object):
             f'model inputs: {self.input_details} \n {self.input_details}')
         logging.info(
             f'model outputs: {self.output_details} \n {self.output_details}')
-
+    @classmethod
+    def validate_labels(cls, labels):
+        return all([x in cls.LABELS for x in labels])
+        
     def label_to_category_index(self, labels):
         # @todo :trashfire:
         return tuple(map(
@@ -283,7 +290,6 @@ class FaceSSD_MobileNet_V2(object):
         image = (image / 128.0) - 1
 
         # The input needs to be a tensor, convert it using `tf.convert_to_tensor`.
-
         input_tensor = tf.convert_to_tensor(image, dtype=tf.float32)
 
         # The model expects a batch of images, so add an axis with `tf.newaxis`.

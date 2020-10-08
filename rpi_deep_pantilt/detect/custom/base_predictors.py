@@ -15,6 +15,7 @@ from rpi_deep_pantilt.detect.util.label import create_category_index_from_labelm
 class BasePredictor(metaclass=ABCMeta):
 
     EDGETPU_SHARED_LIB = 'libedgetpu.so.1'
+    LABELS = []
 
     def __init__(
         self,
@@ -98,6 +99,11 @@ class BasePredictor(metaclass=ABCMeta):
     @abstractmethod
     def predict(self, image):
         pass
+
+    @abstractmethod
+    @classmethod
+    def validate_labels(cls, labels):
+        return all([x cls.LABELS for x in labels])
 
 # TFLite_Detection_PostProcess custom op is a non-max supression op (NMS)
 # utilized in TensorFlow's Object Detection API / Model zoo
