@@ -190,6 +190,7 @@ class FaceSSDMobileNetV2EdgeTPU(object):
 class FaceSSDMobileNetV2Float32(object):
 
     PATH_TO_LABELS = rpi_deep_pantilt_path[0] + '/data/facessd_label_map.pbtxt'
+    LABELS = ['face']
 
     def __init__(
         self,

@@ -49,10 +49,10 @@ class ModelRegistry(object):
                     continue
             raise InvalidLabelException
         if self.edge_tpu:
-            if labels is None:
+            if len(labels) is 0:
                 return self.module.SSDMobileNetV3CocoEdgeTPU
             return _select(self.QUANTIZED_CLASSES)
         else:
-            if labels is None:
+            if len(labels) is 0:
                 return self.module.SSDMobileNetV3Float32
             return _select(self.FLOAT32_CLASSES)

@@ -62,6 +62,9 @@ def detect(api_version, labels, predictor, loglevel, edge_tpu, rotation):
     # TypeError: nargs=-1 in combination with a default value is not supported.
         model_registry = ModelRegistry(edge_tpu=edge_tpu, api_version=api_version)
         predictor_cls = model_registry.select_model(labels)
+    
+    if len(labels) is 0:
+        labels = predictor_cls.LABELS
 
     run_stationary_detect(labels, predictor_cls, rotation)
 
