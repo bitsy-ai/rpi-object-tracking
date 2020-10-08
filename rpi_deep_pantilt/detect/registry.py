@@ -37,15 +37,12 @@ class ModelRegistry(object):
         Args:
             labels: List of labels or None. If labels are not provided, default to SSDMobileNet with COCO labels
         '''
-
         def _select(cls_list):
             for cls_str in cls_list:
-                try:
-                    predictor_cls = getattr(self.module, cls_str)
-                    predictor_cls.validate_labels(labels)
+                predictor_cls = getattr(self.module, cls_str)
+                if predictor_cls.validate_labels(labels):
                     return predictor_cls
-                except InvalidLabelException:
-                    logging.warning(f'Predictor {predictor_cls} does not support all labels {labels}, skipping')
+                else:
                     continue
             raise InvalidLabelException
         if self.edge_tpu:
