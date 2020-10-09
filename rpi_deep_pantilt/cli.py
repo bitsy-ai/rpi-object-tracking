@@ -84,10 +84,12 @@ def list_labels(api_version, edge_tpu):
 
 @cli.command()
 @click.argument('label', type=str, default='person')
+@click.option('--api-version', required=False, type=int, default=2, help='API Version to use (default: 2). API v1 is supported for legacy use cases.')
+@click.option('--predictor', required=False, type=str, default=None, help='Path and module name of a custom predictor class inheriting from rpi_deep_pantilt.detect.custom.base_predictors.BasePredictor')
 @click.option('--loglevel', required=False, type=str, default='WARNING', help='Pass --loglevel=DEBUG to inspect FPS and tracking centroid X/Y coordinates')
 @click.option('--edge-tpu', is_flag=True, required=False, type=bool, default=False, help='Accelerate inferences using Coral USB Edge TPU')
 @click.option('--rotation', default=0, type=int, help='PiCamera rotation. If you followed this guide, a rotation value of 0 is correct. https://medium.com/@grepLeigh/real-time-object-tracking-with-tensorflow-raspberry-pi-and-pan-tilt-hat-2aeaef47e134')
-def track(label, loglevel, edge_tpu, rotation):
+def track(label, api_version, predictor, loglevel, edge_tpu, rotation):
     '''
         rpi-deep-pantilt track [OPTIONS] [LABEL]
 
@@ -106,20 +108,17 @@ def track(label, loglevel, edge_tpu, rotation):
     level = logging.getLevelName(loglevel)
     logging.getLogger().setLevel(level)
 
-    validate_labels((label,))
+    level = logging.getLevelName(loglevel)
+    logging.getLogger().setLevel(level)
 
-    if label == 'face':
-        if edge_tpu:
-            model_cls = FaceSSD_MobileNet_V2_EdgeTPU
-        else:
-            model_cls = FaceSSD_MobileNet_V2
+    if predictor is not None:
+        predictor_cls = importlib.import_module(predictor)
     else:
-        if edge_tpu:
-            model_cls = SSDMobileNet_V3_Coco_EdgeTPU_Quant
-        else:
-            model_cls = SSDMobileNet_V3_Small_Coco_PostProcessed
-
-    return pantilt_process_manager(model_cls, labels=(label,),  rotation=rotation)
+    # TypeError: nargs=-1 in combination with a default value is not supported.
+        model_registry = ModelRegistry(edge_tpu=edge_tpu, api_version=api_version)
+        predictor_cls = model_registry.select_model((label,))
+    
+    return pantilt_process_manager(predictor_cls, labels=(label,),  rotation=rotation)
 
 
 @cli.group()
