@@ -9,12 +9,12 @@ class ModelRegistry(object):
     FLOAT32_CLASSES = (
         'FaceSSDMobileNetV2Float32',
         'SSDMobileNetV3Float32',
-        'EfficientDetLeopardFloat32'
     )
 
     UINT8_CLASSES = (
         'FaceSSDMobileNetV2Int8',
         'SSDMobileNetV3Int8',
+        'LeopardAutoMLInt8'
     )
 
     EDGETPU_CLASSES = (

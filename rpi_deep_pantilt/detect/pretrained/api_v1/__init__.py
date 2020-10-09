@@ -23,9 +23,9 @@ class SSDMobileNetV3Int8(object):
     def __init__(self, *args, **kwargs):
         raise NotImplementedError('Please specify --api-version=2 to load SSDMobileNetV3Int8 predictor')
 
-class EfficientDetLeopardFloat32(object):
+class LeopardAutoMLInt8(object):
     LABELS = []
     def validate_labels(self):
         return False
     def __init__(self, *args, **kwargs):
-        raise NotImplementedError('Please specify--api-version=2 to load EfficientDetLeopardFloat32 predictor')
+        raise NotImplementedError('Please specify--api-version=2 to load LeopardAutoMLInt8 predictor')

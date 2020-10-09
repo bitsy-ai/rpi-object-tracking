@@ -27,13 +27,13 @@ class SSDMobileNetV3EdgeTPU(TFLiteDetectionPostProcessPredictor):
     ):
 
         super().__init__(
-            model_uri=model_uri,
             model_name=model_name,
             tflite_file=tflite_file,
+            label_file=label_file,
+            model_uri=model_uri,
             input_shape=input_shape,
             min_score_thresh=min_score_thresh,
             input_type=input_type,
-            label_file=label_file,
             edge_tpu=True
         )
 
@@ -58,13 +58,13 @@ class SSDMobileNetV3Int8(TFLiteDetectionPostProcessPredictor):
     ):
 
         super().__init__(
-            model_uri=model_uri,
             model_name=model_name,
             tflite_file=tflite_file,
+            label_file=label_file,
+            model_uri=model_uri,
             input_shape=input_shape,
             min_score_thresh=min_score_thresh,
             input_type=input_type,
-            label_file=label_file,
         )
 
 class SSDMobileNetV3Float32(TFLiteDetectionPostProcessPredictor):
@@ -83,10 +83,10 @@ class SSDMobileNetV3Float32(TFLiteDetectionPostProcessPredictor):
     ):
 
         super().__init__(
-            model_uri=model_uri,
             model_name=model_name,
             tflite_file=tflite_file,
             label_file=label_file,
+            model_uri=model_uri,
             input_shape=input_shape,
             min_score_thresh=min_score_thresh,
             input_type=input_type,

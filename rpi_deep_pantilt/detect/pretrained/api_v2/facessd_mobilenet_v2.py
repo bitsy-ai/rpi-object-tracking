@@ -26,10 +26,10 @@ class FaceSSDMobileNetV2EdgeTPU(TFLiteDetectionPostProcessPredictor):
     ):
 
         super().__init__(
-            model_uri=model_uri,
             model_name=model_name,
             tflite_file=tflite_file,
             label_file=label_file,
+            model_uri=model_uri,
             input_shape=input_shape,
             min_score_thresh=min_score_thresh,
             input_type=input_type,
@@ -56,10 +56,10 @@ class FaceSSDMobileNetV2Int8(TFLiteDetectionPostProcessPredictor):
     ):
 
         super().__init__(
-            model_uri=model_uri,
             model_name=model_name,
             tflite_file=tflite_file,
             label_file=label_file,
+            model_uri=model_uri,
             input_shape=input_shape,
             min_score_thresh=min_score_thresh,
             input_type=input_type,
@@ -80,10 +80,10 @@ class FaceSSDMobileNetV2Float32(TFLiteDetectionPostProcessPredictor):
     ):
 
         super().__init__(
-            model_uri=model_uri,
             model_name=model_name,
             tflite_file=tflite_file,
             label_file=label_file,
+            model_uri=model_uri,
             input_shape=input_shape,
             min_score_thresh=min_score_thresh,
             input_type=input_type,

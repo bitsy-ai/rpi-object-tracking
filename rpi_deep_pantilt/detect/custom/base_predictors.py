@@ -22,10 +22,10 @@ class BasePredictor(metaclass=ABCMeta):
 
     def __init__(
         self,
-        model_uri,
         model_name,
         tflite_file,
         label_file,
+        model_uri=None,
         input_shape=(320,320),
         input_type=tf.uint8,
         edge_tpu=False,
@@ -37,23 +37,23 @@ class BasePredictor(metaclass=ABCMeta):
         self.tflite_file = tflite_file
         self.input_type = input_type
         self.label_file = label_file
-
-
-        self.model_dir = tf.keras.utils.get_file(
-            fname=self.model_name,
-            origin=self.model_uri,
-            untar=True,
-            cache_subdir='models'
-        )
-
-        logging.info(f'Downloaded {model_name} to {self.model_dir}')
-
         self.min_score_thresh = min_score_thresh
 
-        self.model_path = os.path.splitext(
+        if model_uri is not None:
+            self.model_dir = tf.keras.utils.get_file(
+                fname=self.model_name,
+                origin=self.model_uri,
+                untar=True,
+                cache_subdir='models'
+            )
+            logging.info(f'Downloaded {model_name} to {self.model_dir}')
+            self.model_path = os.path.splitext(
             os.path.splitext(self.model_dir)[0]
-        )[0] + f'/{self.tflite_file}'
-
+            )[0] + f'/{self.tflite_file}'
+        else:
+            logging.info(f'Loading {model_name} from {tflite_file}')
+            self.model_path = tflite_file
+            
         if edge_tpu:
             try:
                 logging.warning('Loading Coral tflite_runtime for Edge TPU')

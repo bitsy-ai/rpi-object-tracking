@@ -80,8 +80,9 @@ def detect(api_version, labels, predictor, loglevel, edge_tpu, rotation, dtype):
 @cli.command()
 @click.option('--api-version', required=False, type=int, default=2, help='API Version to use (default: 2). API v1 is supported for legacy use cases.')
 @click.option('--edge-tpu', is_flag=True, required=False, type=bool, default=False)
-def list_labels(api_version, edge_tpu):
-    model_registry = ModelRegistry(edge_tpu=edge_tpu, api_version=api_version)
+@click.option('--dtype', type=click.Choice(['uint8', 'float32'], case_sensitive=True), default='uint8')
+def list_labels(api_version, edge_tpu, dtype):
+    model_registry = ModelRegistry(edge_tpu=edge_tpu, api_version=api_version, dtype=dtype)
     pp = pprint.PrettyPrinter(indent=1)
     pp.pprint('The following labels are supported by pretrained models:')
     pp.pprint(model_registry.label_map())
@@ -89,7 +90,7 @@ def list_labels(api_version, edge_tpu):
 
 @cli.command()
 @click.argument('label', type=str, default='person')
-@click.option('--api-version', required=False, type=int, default=2, help='API Version to use (default: 2). API v1 is supported for legacy use cases.')
+@click.option('--api-version', required=False, type=click.Choice(['v1', 'v2']), default='v2', help='API Version to use (default: 2). API v1 is supported for legacy use cases.')
 @click.option('--predictor', required=False, type=str, default=None, help='Path and module name of a custom predictor class inheriting from rpi_deep_pantilt.detect.custom.base_predictors.BasePredictor')
 @click.option('--loglevel', required=False, type=str, default='WARNING', help='Pass --loglevel=DEBUG to inspect FPS and tracking centroid X/Y coordinates')
 @click.option('--edge-tpu', is_flag=True, required=False, type=bool, default=False, help='Accelerate inferences using Coral USB Edge TPU')
