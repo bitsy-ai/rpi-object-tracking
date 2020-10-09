@@ -6,38 +6,39 @@ from rpi_deep_pantilt.detect.util.exceptions import InvalidLabelException
 
 class ModelRegistry(object):
 
-    CLASSES = {
-        1: {
-            'FLOAT32': (
-                'FaceSSDMobileNetV2Float32',
-                'SSDMobileNetV3Float32',
-                'EfficientDetLeopardFloat32'
-            ),
-            'EDGE_TPU': 
-            (
-                'SSDMobileNetV3CocoEdgeTPU',
-                'FaceSSDMobileNetV2EdgeTPU',
-            )
-        }
-    }
-    def __init__(self, edge_tpu, api_version):
+    FLOAT32_CLASSES = (
+        'FaceSSDMobileNetV2Float32',
+        'SSDMobileNetV3Float32',
+        'EfficientDetLeopardFloat32'
+    )
 
-        if api_version not in (1, 2):
-            raise Exception('Invalid API version, Please specify 1 or 2')
-        
+    UINT8_CLASSES = (
+        'FaceSSDMobileNetV2Int8',
+        'SSDMobileNetV3Int8',
+    )
+
+    EDGETPU_CLASSES = (
+        'SSDMobileNetV3EdgeTPU',
+        'FaceSSDMobileNetV2EdgeTPU',
+    )
+
+    def __init__(self, edge_tpu, api_version, dtype):
         self.edge_tpu = edge_tpu
         self.api_version = api_version
-        self.version_str = f'api_v{api_version}'
+        self.version_str = f'api_{api_version}'
 
         self.import_path = f'rpi_deep_pantilt.detect.pretrained.{self.version_str}'
 
         self.module = importlib.import_module(self.import_path)
 
         if edge_tpu:
-            self.model_list = self.CLASSES[api_version]['EDGE_TPU']
-            self.default_model = self.module.SSDMobileNetV3CocoEdgeTPU
+            self.model_list = self.EDGETPU_CLASSES
+            self.default_model = self.module.SSDMobileNetV3EdgeTPU
+        elif dtype == 'uint8':
+            self.model_list = self.UINT8_CLASSES
+            self.default_model = self.module.SSDMobileNetV3Int8
         else:
-            self.model_list = self.CLASSES[api_version]['FLOAT32']
+            self.model_list = self.FLOAT32_CLASSES
             self.default_model = self.module.SSDMobileNetV3Float32
 
     def select_model(self, labels):

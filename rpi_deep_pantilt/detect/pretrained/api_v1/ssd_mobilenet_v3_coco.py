@@ -14,7 +14,7 @@ from rpi_deep_pantilt.detect.util.exceptions import InvalidLabelException
 from rpi_deep_pantilt.detect.util.label import create_category_index_from_labelmap
 from rpi_deep_pantilt.detect.util.visualization import visualize_boxes_and_labels_on_image_array
 
-class SSDMobileNetV3CocoEdgeTPU(object):
+class SSDMobileNetV3EdgeTPU(object):
 
     EDGETPU_SHARED_LIB = 'libedgetpu.so.1'
     PATH_TO_LABELS = rpi_deep_pantilt_path[0] + '/data/mscoco_label_map.pbtxt'

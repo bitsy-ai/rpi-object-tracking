@@ -1,16 +1,19 @@
 
 # Python
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 import logging
 import os
 import sys
 
 
 # lib
+import numpy as np
+from PIL import Image
+
 import tensorflow as tf
 
 from rpi_deep_pantilt.detect.util.label import create_category_index_from_labelmap
-
+from rpi_deep_pantilt.detect.util.visualization import visualize_boxes_and_labels_on_image_array
 
 class BasePredictor(metaclass=ABCMeta):
 
@@ -25,6 +28,7 @@ class BasePredictor(metaclass=ABCMeta):
         label_file,
         input_shape=(320,320),
         input_type=tf.uint8,
+        edge_tpu=False,
         min_score_thresh=0.50
     ):
 
@@ -32,12 +36,13 @@ class BasePredictor(metaclass=ABCMeta):
         self.model_name = model_name
         self.tflite_file = tflite_file
         self.input_type = input_type
+        self.label_file = label_file
 
 
         self.model_dir = tf.keras.utils.get_file(
             fname=self.model_name,
             origin=self.model_uri,
-            extract=True,
+            untar=True,
             cache_subdir='models'
         )
 
@@ -49,21 +54,27 @@ class BasePredictor(metaclass=ABCMeta):
             os.path.splitext(self.model_dir)[0]
         )[0] + f'/{self.tflite_file}'
 
-        try:
-            from tflite_runtime import interpreter as coral_tflite_interpreter
-            self.tflite_interpreter = coral_tflite_interpreter.Interpreter(
-                model_path=self.model_path,
-                experimental_delegates=[
-                    tf.lite.experimental.load_delegate(self.EDGETPU_SHARED_LIB)
-                ]
-            )
-        except ImportError as e:
-            logging.warning('Failed to import Coral Edge TPU tflite_runtime. Falling back to TensorFlow tflite runtime. If you are using an Edge TPU, please run: \n')
-            logging.warning(
-                '$ pip install https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp37-cp37m-linux_armv7l.whl')
+        if edge_tpu:
+            try:
+                logging.warning('Loading Coral tflite_runtime for Edge TPU')
+                from tflite_runtime import interpreter as coral_tflite_interpreter
+                self.tflite_interpreter = coral_tflite_interpreter.Interpreter(
+                    model_path=self.model_path,
+                    experimental_delegates=[
+                        tf.lite.experimental.load_delegate(self.EDGETPU_SHARED_LIB)
+                    ]
+                )
+            except ImportError as e:
+                logging.warning('Failed to import Coral Edge TPU tflite_runtime. Falling back to TensorFlow tflite runtime. If you are using an Edge TPU, please run: \n')
+                logging.warning(
+                    '$ pip install https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp37-cp37m-linux_armv7l.whl')
+                self.tflite_interpreter = tf.lite.Interpreter(
+                    model_path=self.model_path,
+                )
+        else:
             self.tflite_interpreter = tf.lite.Interpreter(
                 model_path=self.model_path,
-            )
+            )            
 
         self.tflite_interpreter.allocate_tensors()
         self.input_details = self.tflite_interpreter.get_input_details()
@@ -73,7 +84,7 @@ class BasePredictor(metaclass=ABCMeta):
             label_file, use_display_name=True)
 
         logging.info(
-            f'loaded labels from {self.PATH_TO_LABELS} \n {self.category_index}')
+            f'loaded labels from {self.label_file} \n {self.category_index}')
 
         logging.info(f'initialized model {model_name} \n')
         logging.info(
@@ -100,10 +111,9 @@ class BasePredictor(metaclass=ABCMeta):
     def predict(self, image):
         pass
 
-    @abstractmethod
     @classmethod
     def validate_labels(cls, labels):
-        return all([x cls.LABELS for x in labels])
+        return all([x in cls.LABELS for x in labels])
 
 # TFLite_Detection_PostProcess custom op is a non-max supression op (NMS)
 # utilized in TensorFlow's Object Detection API / Model zoo
