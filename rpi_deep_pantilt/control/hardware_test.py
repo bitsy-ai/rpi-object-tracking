@@ -12,20 +12,20 @@ from picamera import PiCamera
 def camera_test(rotation):
     camera = PiCamera()
     camera.rotation = rotation
-    logging.info('Starting Raspberry Pi Camera')
+    logging.info("Starting Raspberry Pi Camera")
     camera.start_preview()
 
     try:
         while True:
             continue
     except KeyboardInterrupt:
-        logging.info('Stopping Raspberry Pi Camera')
+        logging.info("Stopping Raspberry Pi Camera")
         camera.stop_preview()
 
 
 def pantilt_test():
-    logging.info('Starting Pan-Tilt HAT test!')
-    logging.info('Pan-Tilt HAT should follow a smooth sine wave')
+    logging.info("Starting Pan-Tilt HAT test!")
+    logging.info("Pan-Tilt HAT should follow a smooth sine wave")
     while True:
         # Get the time in seconds
         t = time.time()
@@ -41,5 +41,5 @@ def pantilt_test():
         time.sleep(0.005)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pantilt_test()
