@@ -3,8 +3,11 @@
 """Console script for rpi_deep_pantilt."""
 import importlib
 import logging
+import pprint
 import sys
+
 import click
+
 
 from rpi_deep_pantilt.detect.camera import run_stationary_detect
 from rpi_deep_pantilt.detect.registry import ModelRegistry
@@ -70,13 +73,13 @@ def detect(api_version, labels, predictor, loglevel, edge_tpu, rotation):
 
 
 @cli.command()
-@click.option('--loglevel', required=False, type=str, default='WARNING', help='List all valid classification labels')
-def list_labels(loglevel):
-    level = logging.getLevelName(loglevel)
-    logging.getLogger().setLevel(level)
-    model = SSDMobileNet_V3_Small_Coco_PostProcessed()
-    print('You can detect / track the following objects:')
-    print([x['name'] for x in model.category_index.values()])
+@click.option('--api-version', required=False, type=int, default=2, help='API Version to use (default: 2). API v1 is supported for legacy use cases.')
+@click.option('--edge-tpu', is_flag=True, required=False, type=bool, default=False)
+def list_labels(api_version, edge_tpu):
+    model_registry = ModelRegistry(edge_tpu=edge_tpu, api_version=api_version)
+    pp = pprint.PrettyPrinter(indent=1)
+    pp.pprint('The following labels are supported by pretrained models:')
+    pp.pprint(model_registry.label_map())
 
 
 @cli.command()

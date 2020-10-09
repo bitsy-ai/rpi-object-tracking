@@ -6,17 +6,20 @@ from rpi_deep_pantilt.detect.util.exceptions import InvalidLabelException
 
 class ModelRegistry(object):
 
-    FLOAT32_CLASSES = (
-        'FaceSSDMobileNetV2Float32',
-        'SSDMobileNetV3Float32',
-        'EfficientDetLeopardFloat32'
-    )
-
-    QUANTIZED_CLASSES = (
-        'SSDMobileNetV3CocoEdgeTPU',
-        'FaceSSDMobileNetV2EdgeTPU',
-    )
-
+    CLASSES = {
+        1: {
+            'FLOAT32': (
+                'FaceSSDMobileNetV2Float32',
+                'SSDMobileNetV3Float32',
+                'EfficientDetLeopardFloat32'
+            ),
+            'EDGE_TPU': 
+            (
+                'SSDMobileNetV3CocoEdgeTPU',
+                'FaceSSDMobileNetV2EdgeTPU',
+            )
+        }
+    }
     def __init__(self, edge_tpu, api_version):
 
         if api_version not in (1, 2):
@@ -29,6 +32,13 @@ class ModelRegistry(object):
         self.import_path = f'rpi_deep_pantilt.detect.pretrained.{self.version_str}'
 
         self.module = importlib.import_module(self.import_path)
+
+        if edge_tpu:
+            self.model_list = self.CLASSES[api_version]['EDGE_TPU']
+            self.default_model = self.module.SSDMobileNetV3CocoEdgeTPU
+        else:
+            self.model_list = self.CLASSES[api_version]['FLOAT32']
+            self.default_model = self.module.SSDMobileNetV3Float32
 
     def select_model(self, labels):
         '''Select best model for provided labels
@@ -45,11 +55,12 @@ class ModelRegistry(object):
                 else:
                     continue
             raise InvalidLabelException
-        if self.edge_tpu:
-            if len(labels) is 0:
-                return self.module.SSDMobileNetV3CocoEdgeTPU
-            return _select(self.QUANTIZED_CLASSES)
+        if len(labels) is 0:
+            return self.default_model
         else:
-            if len(labels) is 0:
-                return self.module.SSDMobileNetV3Float32
-            return _select(self.FLOAT32_CLASSES)
+            return _select(self.model_list)
+    
+    def label_map(self):
+        return {
+            x: getattr(self.module, x).LABELS for x in self.model_list
+         }
