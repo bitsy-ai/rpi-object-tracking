@@ -45,8 +45,4 @@ class PIDController:
         self.error_prev = error
 
         # sum the terms and return
-        return sum([
-            self.kP * self.cP,
-            self.kI * self.cI,
-            self.kD * self.cD]
-        )
+        return sum([self.kP * self.cP, self.kI * self.cI, self.kD * self.cD])

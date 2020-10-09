@@ -23,9 +23,7 @@ from google.protobuf import text_format
 from rpi_deep_pantilt.detect.util import string_int_label_map_pb2
 
 
-def convert_label_map_to_categories(label_map,
-                                    max_num_classes,
-                                    use_display_name=True):
+def convert_label_map_to_categories(label_map, max_num_classes, use_display_name=True):
     """Given label map proto returns categories list compatible with eval.
 
     This function converts label map proto and returns a list of dicts, each of
@@ -54,24 +52,27 @@ def convert_label_map_to_categories(label_map,
     if not label_map:
         label_id_offset = 1
         for class_id in range(max_num_classes):
-            categories.append({
-                'id': class_id + label_id_offset,
-                'name': 'category_{}'.format(class_id + label_id_offset)
-            })
+            categories.append(
+                {
+                    "id": class_id + label_id_offset,
+                    "name": "category_{}".format(class_id + label_id_offset),
+                }
+            )
         return categories
     for item in label_map.item:
         if not 0 < item.id <= max_num_classes:
             logging.info(
-                'Ignore item %d since it falls outside of requested '
-                'label range.', item.id)
+                "Ignore item %d since it falls outside of requested " "label range.",
+                item.id,
+            )
             continue
-        if use_display_name and item.HasField('display_name'):
+        if use_display_name and item.HasField("display_name"):
             name = item.display_name
         else:
             name = item.name
         if item.id not in list_of_ids_already_added:
             list_of_ids_already_added.append(item.id)
-            categories.append({'id': item.id, 'name': name})
+            categories.append({"id": item.id, "name": name})
     return categories
 
 
@@ -86,11 +87,13 @@ def _validate_label_map(label_map):
     """
     for item in label_map.item:
         if item.id < 0:
-            raise ValueError('Label map ids should be >= 0.')
-        if (item.id == 0 and item.name != 'background' and
-                item.display_name != 'background'):
-            raise ValueError(
-                'Label map id 0 is reserved for the background label')
+            raise ValueError("Label map ids should be >= 0.")
+        if (
+            item.id == 0
+            and item.name != "background"
+            and item.display_name != "background"
+        ):
+            raise ValueError("Label map id 0 is reserved for the background label")
 
 
 def load_labelmap(path):
@@ -101,7 +104,7 @@ def load_labelmap(path):
     Returns:
       a StringIntLabelMapProto
     """
-    with tf.compat.v1.gfile.GFile(path, 'r') as fid:
+    with tf.compat.v1.gfile.GFile(path, "r") as fid:
         label_map_string = fid.read()
         label_map = string_int_label_map_pb2.StringIntLabelMap()
         try:
@@ -131,8 +134,7 @@ def create_categories_from_labelmap(label_map_path, use_display_name=True):
     """
     label_map = load_labelmap(label_map_path)
     max_num_classes = max(item.id for item in label_map.item)
-    return convert_label_map_to_categories(label_map, max_num_classes,
-                                           use_display_name)
+    return convert_label_map_to_categories(label_map, max_num_classes, use_display_name)
 
 
 def create_category_index(categories):
@@ -150,7 +152,7 @@ def create_category_index(categories):
     """
     category_index = {}
     for cat in categories:
-        category_index[cat['id']] = cat
+        category_index[cat["id"]] = cat
     return category_index
 
 
@@ -168,6 +170,5 @@ def create_category_index_from_labelmap(label_map_path, use_display_name=True):
       containing categories, e.g.
       {1: {'id': 1, 'name': 'dog'}, 2: {'id': 2, 'name': 'cat'}, ...}
     """
-    categories = create_categories_from_labelmap(
-        label_map_path, use_display_name)
+    categories = create_categories_from_labelmap(label_map_path, use_display_name)
     return create_category_index(categories)
