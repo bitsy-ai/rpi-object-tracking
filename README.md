@@ -59,6 +59,7 @@ $ source .venv/bin/activate
 4. Upgrade setuptools
 
 ```bash
+$ python3 -m pip install --upgrade pip
 $ pip install --upgrade setuptools
 ```
 
