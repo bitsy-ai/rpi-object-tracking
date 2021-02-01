@@ -59,13 +59,14 @@ $ source .venv/bin/activate
 4. Upgrade setuptools
 
 ```bash
+$ python3 -m pip install --upgrade pip
 $ pip install --upgrade setuptools
 ```
 
-5. Install TensorFlow 2.2 (community-built wheel)
+5. Install TensorFlow 2.4 (community-built wheel)
 
 ```bash
-$ pip install https://github.com/leigh-johnson/Tensorflow-bin/releases/download/v2.2.0/tensorflow-2.2.0-cp37-cp37m-linux_armv7l.whl
+$ pip install https://github.com/bitsy-ai/tensorflow-arm-bin/releases/download/v2.4.0/tensorflow-2.4.0-cp37-none-linux_armv7l.whl
 
 ```
 
@@ -80,7 +81,7 @@ pip install rpi-deep-pantilt
 NOTE: This step is only required if you are using [Coral's Edge TPU USB Accelerator](https://coral.withgoogle.com/products/accelerator). If you would like to run TFLite inferences using CPU only, skip this step. 
 
 ```bash
-$ pip install https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp37-cp37m-linux_armv7l.whl
+$ pip install https://github.com/google-coral/pycoral/releases/download/release-frogfish/tflite_runtime-2.5.0-cp37-cp37m-linux_armv7l.whl
 ```
 
 =======
@@ -102,14 +103,35 @@ WARNING: Do not skip this section! You will not be able to use `rpi-deep-pantilt
 
 ![raspi-config enable camera yes/no menu](/images/camera3.png)
 
-### Enable i2c in Device Tree
+### Enable SPI in Device Tree
+1. Run `sudo raspi-config` and select `Interfacing Options` from the Raspberry Pi Software Configuration Tool’s main menu. Press ENTER.
 
-1. Open `/boot/config.txt` and verify the following `dtparams` lines are uncommented:
+![raspi-config main menu](/images/camera1.png)
+
+2. Select the SPI menu option and press ENTER.
+
+3. In the next menu, use the right arrow key to highlight Yes and press ENTER.
+
+### Enable i2c in Device Tree
+#### A - Using raspi-config
+
+1. Run `sudo raspi-config` and select `Interfacing Options` from the Raspberry Pi Software Configuration Tool’s main menu. Press ENTER.
+
+![raspi-config main menu](/images/camera1.png)
+
+2. Select the I2C menu option and press ENTER.
+
+3. In the next menu, use the right arrow key to highlight Yes and press ENTER.
+
+#### B - Editing configuation files
+
+Alternatively, open `/boot/config.txt` and ensure that the following `dtparams` lines are uncommented:
 
 ```bash
 dtparam=i2c1=on
 dtparam=i2c_arm=on
 ```
+
 # Example Usage
 
 ## Object Detection
