@@ -1,4 +1,3 @@
-
 # Copyright 2019 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,29 +25,132 @@ import PIL.ImageFont as ImageFont
 import six
 
 STANDARD_COLORS = [
-    'AliceBlue', 'Chartreuse', 'Aqua', 'Aquamarine', 'Azure', 'Beige', 'Bisque',
-    'BlanchedAlmond', 'BlueViolet', 'BurlyWood', 'CadetBlue', 'AntiqueWhite',
-    'Chocolate', 'Coral', 'CornflowerBlue', 'Cornsilk', 'Crimson', 'Cyan',
-    'DarkCyan', 'DarkGoldenRod', 'DarkGrey', 'DarkKhaki', 'DarkOrange',
-    'DarkOrchid', 'DarkSalmon', 'DarkSeaGreen', 'DarkTurquoise', 'DarkViolet',
-    'DeepPink', 'DeepSkyBlue', 'DodgerBlue', 'FireBrick', 'FloralWhite',
-    'ForestGreen', 'Fuchsia', 'Gainsboro', 'GhostWhite', 'Gold', 'GoldenRod',
-    'Salmon', 'Tan', 'HoneyDew', 'HotPink', 'IndianRed', 'Ivory', 'Khaki',
-    'Lavender', 'LavenderBlush', 'LawnGreen', 'LemonChiffon', 'LightBlue',
-    'LightCoral', 'LightCyan', 'LightGoldenRodYellow', 'LightGray', 'LightGrey',
-    'LightGreen', 'LightPink', 'LightSalmon', 'LightSeaGreen', 'LightSkyBlue',
-    'LightSlateGray', 'LightSlateGrey', 'LightSteelBlue', 'LightYellow', 'Lime',
-    'LimeGreen', 'Linen', 'Magenta', 'MediumAquaMarine', 'MediumOrchid',
-    'MediumPurple', 'MediumSeaGreen', 'MediumSlateBlue', 'MediumSpringGreen',
-    'MediumTurquoise', 'MediumVioletRed', 'MintCream', 'MistyRose', 'Moccasin',
-    'NavajoWhite', 'OldLace', 'Olive', 'OliveDrab', 'Orange', 'OrangeRed',
-    'Orchid', 'PaleGoldenRod', 'PaleGreen', 'PaleTurquoise', 'PaleVioletRed',
-    'PapayaWhip', 'PeachPuff', 'Peru', 'Pink', 'Plum', 'PowderBlue', 'Purple',
-    'Red', 'RosyBrown', 'RoyalBlue', 'SaddleBrown', 'Green', 'SandyBrown',
-    'SeaGreen', 'SeaShell', 'Sienna', 'Silver', 'SkyBlue', 'SlateBlue',
-    'SlateGray', 'SlateGrey', 'Snow', 'SpringGreen', 'SteelBlue', 'GreenYellow',
-    'Teal', 'Thistle', 'Tomato', 'Turquoise', 'Violet', 'Wheat', 'White',
-    'WhiteSmoke', 'Yellow', 'YellowGreen'
+    "AliceBlue",
+    "Chartreuse",
+    "Aqua",
+    "Aquamarine",
+    "Azure",
+    "Beige",
+    "Bisque",
+    "BlanchedAlmond",
+    "BlueViolet",
+    "BurlyWood",
+    "CadetBlue",
+    "AntiqueWhite",
+    "Chocolate",
+    "Coral",
+    "CornflowerBlue",
+    "Cornsilk",
+    "Crimson",
+    "Cyan",
+    "DarkCyan",
+    "DarkGoldenRod",
+    "DarkGrey",
+    "DarkKhaki",
+    "DarkOrange",
+    "DarkOrchid",
+    "DarkSalmon",
+    "DarkSeaGreen",
+    "DarkTurquoise",
+    "DarkViolet",
+    "DeepPink",
+    "DeepSkyBlue",
+    "DodgerBlue",
+    "FireBrick",
+    "FloralWhite",
+    "ForestGreen",
+    "Fuchsia",
+    "Gainsboro",
+    "GhostWhite",
+    "Gold",
+    "GoldenRod",
+    "Salmon",
+    "Tan",
+    "HoneyDew",
+    "HotPink",
+    "IndianRed",
+    "Ivory",
+    "Khaki",
+    "Lavender",
+    "LavenderBlush",
+    "LawnGreen",
+    "LemonChiffon",
+    "LightBlue",
+    "LightCoral",
+    "LightCyan",
+    "LightGoldenRodYellow",
+    "LightGray",
+    "LightGrey",
+    "LightGreen",
+    "LightPink",
+    "LightSalmon",
+    "LightSeaGreen",
+    "LightSkyBlue",
+    "LightSlateGray",
+    "LightSlateGrey",
+    "LightSteelBlue",
+    "LightYellow",
+    "Lime",
+    "LimeGreen",
+    "Linen",
+    "Magenta",
+    "MediumAquaMarine",
+    "MediumOrchid",
+    "MediumPurple",
+    "MediumSeaGreen",
+    "MediumSlateBlue",
+    "MediumSpringGreen",
+    "MediumTurquoise",
+    "MediumVioletRed",
+    "MintCream",
+    "MistyRose",
+    "Moccasin",
+    "NavajoWhite",
+    "OldLace",
+    "Olive",
+    "OliveDrab",
+    "Orange",
+    "OrangeRed",
+    "Orchid",
+    "PaleGoldenRod",
+    "PaleGreen",
+    "PaleTurquoise",
+    "PaleVioletRed",
+    "PapayaWhip",
+    "PeachPuff",
+    "Peru",
+    "Pink",
+    "Plum",
+    "PowderBlue",
+    "Purple",
+    "Red",
+    "RosyBrown",
+    "RoyalBlue",
+    "SaddleBrown",
+    "Green",
+    "SandyBrown",
+    "SeaGreen",
+    "SeaShell",
+    "Sienna",
+    "Silver",
+    "SkyBlue",
+    "SlateBlue",
+    "SlateGray",
+    "SlateGrey",
+    "Snow",
+    "SpringGreen",
+    "SteelBlue",
+    "GreenYellow",
+    "Teal",
+    "Thistle",
+    "Tomato",
+    "Turquoise",
+    "Violet",
+    "Wheat",
+    "White",
+    "WhiteSmoke",
+    "Yellow",
+    "YellowGreen",
 ]
 
 
@@ -74,13 +176,13 @@ def _get_multiplier_for_color_randomness():
         return 1
 
     # Return the closest prime number to num_colors / 10.
-    abs_distance = [np.abs(num_colors / 10. - p) for p in prime_candidates]
+    abs_distance = [np.abs(num_colors / 10.0 - p) for p in prime_candidates]
     num_candidates = len(abs_distance)
     inds = [i for _, i in sorted(zip(abs_distance, range(num_candidates)))]
     return prime_candidates[inds[0]]
 
 
-def draw_mask_on_image_array(image, mask, color='red', alpha=0.4):
+def draw_mask_on_image_array(image, mask, color="red", alpha=0.4):
     """Draws mask on an image.
 
     Args:
@@ -94,34 +196,39 @@ def draw_mask_on_image_array(image, mask, color='red', alpha=0.4):
       ValueError: On incorrect data type for image or masks.
     """
     if image.dtype != np.uint8:
-        raise ValueError('`image` not of type np.uint8')
+        raise ValueError("`image` not of type np.uint8")
     if mask.dtype != np.uint8:
-        raise ValueError('`mask` not of type np.uint8')
+        raise ValueError("`mask` not of type np.uint8")
     if np.any(np.logical_and(mask != 1, mask != 0)):
-        raise ValueError('`mask` elements should be in [0, 1]')
+        raise ValueError("`mask` elements should be in [0, 1]")
     if image.shape[:2] != mask.shape:
-        raise ValueError('The image has spatial dimensions %s but the mask has '
-                         'dimensions %s' % (image.shape[:2], mask.shape))
+        raise ValueError(
+            "The image has spatial dimensions %s but the mask has "
+            "dimensions %s" % (image.shape[:2], mask.shape)
+        )
     rgb = ImageColor.getrgb(color)
     pil_image = Image.fromarray(image)
 
-    solid_color = np.expand_dims(
-        np.ones_like(mask), axis=2) * np.reshape(list(rgb), [1, 1, 3])
-    pil_solid_color = Image.fromarray(np.uint8(solid_color)).convert('RGBA')
-    pil_mask = Image.fromarray(np.uint8(255.0*alpha*mask)).convert('L')
+    solid_color = np.expand_dims(np.ones_like(mask), axis=2) * np.reshape(
+        list(rgb), [1, 1, 3]
+    )
+    pil_solid_color = Image.fromarray(np.uint8(solid_color)).convert("RGBA")
+    pil_mask = Image.fromarray(np.uint8(255.0 * alpha * mask)).convert("L")
     pil_image = Image.composite(pil_solid_color, pil_image, pil_mask)
-    np.copyto(image, np.array(pil_image.convert('RGB')))
+    np.copyto(image, np.array(pil_image.convert("RGB")))
 
 
-def draw_bounding_box_on_image(image,
-                               ymin,
-                               xmin,
-                               ymax,
-                               xmax,
-                               color='red',
-                               thickness=4,
-                               display_str_list=(),
-                               use_normalized_coordinates=True):
+def draw_bounding_box_on_image(
+    image,
+    ymin,
+    xmin,
+    ymax,
+    xmax,
+    color="red",
+    thickness=4,
+    display_str_list=(),
+    use_normalized_coordinates=True,
+):
     """Adds a bounding box to an image.
 
     Bounding box coordinates can be specified in either absolute (pixel) or
@@ -149,14 +256,21 @@ def draw_bounding_box_on_image(image,
     draw = ImageDraw.Draw(image)
     im_width, im_height = image.size
     if use_normalized_coordinates:
-        (left, right, top, bottom) = (xmin * im_width, xmax * im_width,
-                                      ymin * im_height, ymax * im_height)
+        (left, right, top, bottom) = (
+            xmin * im_width,
+            xmax * im_width,
+            ymin * im_height,
+            ymax * im_height,
+        )
     else:
         (left, right, top, bottom) = (xmin, xmax, ymin, ymax)
-    draw.line([(left, top), (left, bottom), (right, bottom),
-               (right, top), (left, top)], width=thickness, fill=color)
+    draw.line(
+        [(left, top), (left, bottom), (right, bottom), (right, top), (left, top)],
+        width=thickness,
+        fill=color,
+    )
     try:
-        font = ImageFont.truetype('arial.ttf', 24)
+        font = ImageFont.truetype("arial.ttf", 24)
     except IOError:
         font = ImageFont.load_default()
 
@@ -176,26 +290,32 @@ def draw_bounding_box_on_image(image,
         text_width, text_height = font.getsize(display_str)
         margin = np.ceil(0.05 * text_height)
         draw.rectangle(
-            [(left, text_bottom - text_height - 2 * margin), (left + text_width,
-                                                              text_bottom)],
-            fill=color)
+            [
+                (left, text_bottom - text_height - 2 * margin),
+                (left + text_width, text_bottom),
+            ],
+            fill=color,
+        )
         draw.text(
             (left + margin, text_bottom - text_height - margin),
             display_str,
-            fill='black',
-            font=font)
+            fill="black",
+            font=font,
+        )
         text_bottom -= text_height - 2 * margin
 
 
-def draw_bounding_box_on_image_array(image,
-                                     ymin,
-                                     xmin,
-                                     ymax,
-                                     xmax,
-                                     color='red',
-                                     thickness=4,
-                                     display_str_list=(),
-                                     use_normalized_coordinates=True):
+def draw_bounding_box_on_image_array(
+    image,
+    ymin,
+    xmin,
+    ymax,
+    xmax,
+    color="red",
+    thickness=4,
+    display_str_list=(),
+    use_normalized_coordinates=True,
+):
     """Adds a bounding box to an image (numpy array).
 
     Bounding box coordinates can be specified in either absolute (pixel) or
@@ -215,18 +335,24 @@ def draw_bounding_box_on_image_array(image,
         ymin, xmin, ymax, xmax as relative to the image.  Otherwise treat
         coordinates as absolute.
     """
-    image_pil = Image.fromarray(np.uint8(image)).convert('RGB')
-    draw_bounding_box_on_image(image_pil, ymin, xmin, ymax, xmax, color,
-                               thickness, display_str_list,
-                               use_normalized_coordinates)
+    image_pil = Image.fromarray(np.uint8(image)).convert("RGB")
+    draw_bounding_box_on_image(
+        image_pil,
+        ymin,
+        xmin,
+        ymax,
+        xmax,
+        color,
+        thickness,
+        display_str_list,
+        use_normalized_coordinates,
+    )
     np.copyto(image, np.array(image_pil))
 
 
-def draw_keypoints_on_image(image,
-                            keypoints,
-                            color='red',
-                            radius=2,
-                            use_normalized_coordinates=True):
+def draw_keypoints_on_image(
+    image, keypoints, color="red", radius=2, use_normalized_coordinates=True
+):
     """Draws keypoints on an image.
 
     Args:
@@ -245,16 +371,19 @@ def draw_keypoints_on_image(image,
         keypoints_x = tuple([im_width * x for x in keypoints_x])
         keypoints_y = tuple([im_height * y for y in keypoints_y])
     for keypoint_x, keypoint_y in zip(keypoints_x, keypoints_y):
-        draw.ellipse([(keypoint_x - radius, keypoint_y - radius),
-                      (keypoint_x + radius, keypoint_y + radius)],
-                     outline=color, fill=color)
+        draw.ellipse(
+            [
+                (keypoint_x - radius, keypoint_y - radius),
+                (keypoint_x + radius, keypoint_y + radius),
+            ],
+            outline=color,
+            fill=color,
+        )
 
 
-def draw_keypoints_on_image_array(image,
-                                  keypoints,
-                                  color='red',
-                                  radius=2,
-                                  use_normalized_coordinates=True):
+def draw_keypoints_on_image_array(
+    image, keypoints, color="red", radius=2, use_normalized_coordinates=True
+):
     """Draws keypoints on an image (numpy array).
 
     Args:
@@ -265,31 +394,33 @@ def draw_keypoints_on_image_array(image,
       use_normalized_coordinates: if True (default), treat keypoint values as
         relative to the image.  Otherwise treat them as absolute.
     """
-    image_pil = Image.fromarray(np.uint8(image)).convert('RGB')
-    draw_keypoints_on_image(image_pil, keypoints, color, radius,
-                            use_normalized_coordinates)
+    image_pil = Image.fromarray(np.uint8(image)).convert("RGB")
+    draw_keypoints_on_image(
+        image_pil, keypoints, color, radius, use_normalized_coordinates
+    )
     np.copyto(image, np.array(image_pil))
 
 
 def visualize_boxes_and_labels_on_image_array(
-        image,
-        boxes,
-        classes,
-        scores,
-        category_index,
-        instance_masks=None,
-        instance_boundaries=None,
-        keypoints=None,
-        track_ids=None,
-        use_normalized_coordinates=False,
-        max_boxes_to_draw=20,
-        min_score_thresh=.5,
-        agnostic_mode=False,
-        line_thickness=4,
-        groundtruth_box_visualization_color='black',
-        skip_scores=False,
-        skip_labels=False,
-        skip_track_ids=False):
+    image,
+    boxes,
+    classes,
+    scores,
+    category_index,
+    instance_masks=None,
+    instance_boundaries=None,
+    keypoints=None,
+    track_ids=None,
+    use_normalized_coordinates=False,
+    max_boxes_to_draw=20,
+    min_score_thresh=0.5,
+    agnostic_mode=False,
+    line_thickness=4,
+    groundtruth_box_visualization_color="black",
+    skip_scores=False,
+    skip_labels=False,
+    skip_track_ids=False,
+):
     """Overlay labeled boxes on an image with formatted scores and label names.
 
     This function groups boxes that correspond to the same location
@@ -358,52 +489,47 @@ def visualize_boxes_and_labels_on_image_array(
             if scores is None:
                 box_to_color_map[box] = groundtruth_box_visualization_color
             else:
-                display_str = ''
+                display_str = ""
                 if not skip_labels:
                     if not agnostic_mode:
                         if classes[i] in six.viewkeys(category_index):
-                            class_name = category_index[classes[i]]['name']
+                            class_name = category_index[classes[i]]["name"]
                         else:
-                            class_name = 'N/A'
+                            class_name = "N/A"
                         display_str = str(class_name)
                 if not skip_scores:
                     if not display_str:
-                        display_str = '{}%'.format(int(100*scores[i]))
+                        display_str = "{}%".format(int(100 * scores[i]))
                     else:
-                        display_str = '{}: {}%'.format(
-                            display_str, int(100*scores[i]))
+                        display_str = "{}: {}%".format(
+                            display_str, int(100 * scores[i])
+                        )
                 if not skip_track_ids and track_ids is not None:
                     if not display_str:
-                        display_str = 'ID {}'.format(track_ids[i])
+                        display_str = "ID {}".format(track_ids[i])
                     else:
-                        display_str = '{}: ID {}'.format(
-                            display_str, track_ids[i])
+                        display_str = "{}: ID {}".format(display_str, track_ids[i])
                 box_to_display_str_map[box].append(display_str)
                 if agnostic_mode:
-                    box_to_color_map[box] = 'DarkOrange'
+                    box_to_color_map[box] = "DarkOrange"
                 elif track_ids is not None:
                     prime_multipler = _get_multiplier_for_color_randomness()
                     box_to_color_map[box] = STANDARD_COLORS[
-                        (prime_multipler * track_ids[i]) % len(STANDARD_COLORS)]
+                        (prime_multipler * track_ids[i]) % len(STANDARD_COLORS)
+                    ]
                 else:
                     box_to_color_map[box] = STANDARD_COLORS[
-                        classes[i] % len(STANDARD_COLORS)]
+                        classes[i] % len(STANDARD_COLORS)
+                    ]
 
     # Draw all boxes onto image.
     for box, color in box_to_color_map.items():
         ymin, xmin, ymax, xmax = box
         if instance_masks is not None:
-            draw_mask_on_image_array(
-                image,
-                box_to_instance_masks_map[box],
-                color=color
-            )
+            draw_mask_on_image_array(image, box_to_instance_masks_map[box], color=color)
         if instance_boundaries is not None:
             draw_mask_on_image_array(
-                image,
-                box_to_instance_boundaries_map[box],
-                color='red',
-                alpha=1.0
+                image, box_to_instance_boundaries_map[box], color="red", alpha=1.0
             )
         draw_bounding_box_on_image_array(
             image,
@@ -414,13 +540,15 @@ def visualize_boxes_and_labels_on_image_array(
             color=color,
             thickness=line_thickness,
             display_str_list=box_to_display_str_map[box],
-            use_normalized_coordinates=use_normalized_coordinates)
+            use_normalized_coordinates=use_normalized_coordinates,
+        )
         if keypoints is not None:
             draw_keypoints_on_image_array(
                 image,
                 box_to_keypoints_map[box],
                 color=color,
                 radius=line_thickness / 2,
-                use_normalized_coordinates=use_normalized_coordinates)
+                use_normalized_coordinates=use_normalized_coordinates,
+            )
 
     return image

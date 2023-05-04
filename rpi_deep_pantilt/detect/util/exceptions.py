@@ -1,0 +1,2 @@
+class InvalidLabelException(Exception):
+    pass
